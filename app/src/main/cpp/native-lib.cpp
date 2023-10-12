@@ -18,8 +18,8 @@ Java_com_example_kotlinpsi_MainActivity_Boringtest(JNIEnv *env, jobject thiz) {
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_example_kotlinpsi_MainActivity_CryptoMessage(JNIEnv *env, jobject thiz, jstring message,jstring message_cl) {
+JNIEXPORT jstring JNICALL
+Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject thiz, jstring message,jstring message_cl) {
     const char *mes=env->GetStringUTFChars(message,nullptr);
     EC_KEY *ec_key = EC_KEY_new_by_curve_name(EC_curve_nist2nid("P-256"));
     EC_KEY_generate_key(ec_key);
@@ -130,16 +130,28 @@ Java_com_example_kotlinpsi_MainActivity_CryptoMessage(JNIEnv *env, jobject thiz,
     //pxとpxy_encを比較
     i=i_cl=0;
     int k=-1;
-    for(i=0;i<nx;i++){
-        for(i_cl=0;i_cl<nx_cl;i_cl++){
-            if(EC_POINT_cmp(ec_group_cl,px[i],pxy_enc[i_cl],ctx_cl)==0){
-                //共通要素
-                k=i_cl;
-                __android_log_print(ANDROID_LOG_DEBUG,"cpp","psi: %c",mes_cl[i_cl]);
-                break;
-            }
+    std::string result="";
+//    for(i=0;i<nx;i++){
+//        for(i_cl=0;i_cl<nx_cl;i_cl++){
+//            if(EC_POINT_cmp(ec_group_cl,px[i],pxy_enc[i_cl],ctx_cl)==0){
+//                //共通要素
+//                k=i_cl;
+//                __android_log_print(ANDROID_LOG_DEBUG,"cpp","psi: %c",mes_cl[i_cl]);
+//                break;
+//            }
+//        }
+//    }
+// 二重ループの削除
+/*
+ * 上記の二重ループにすると"test"と"teat"を比較したときに"test"の2回目の"t"と"teat"の最初の"t"が共通要素になってしまう
+ */
+    for(i_cl=0;i_cl<nx_cl;i_cl++){
+        if(EC_POINT_cmp(ec_group_cl,px[i_cl],pxy_enc[i_cl],ctx_cl)==0){
+            __android_log_print(ANDROID_LOG_DEBUG,"cpp","psi: %c",mes_cl[i_cl]);
+            result+=mes_cl[i_cl];
         }
     }
+
 
     //メモリ開放
 //    BN_free(pri_key_point);
@@ -171,5 +183,20 @@ Java_com_example_kotlinpsi_MainActivity_CryptoMessage(JNIEnv *env, jobject thiz,
 
     BN_MONT_CTX_free(bnMontCtx);
 
+    env->ReleaseStringUTFChars(message,mes);
+    env->ReleaseStringUTFChars(message_cl,mes_cl);
+
+    return env->NewStringUTF(result.c_str());
+}
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_kotlinpsi_MainActivity_Socket_1Server(JNIEnv *env, jobject thiz, jstring message) {
+    return 1;
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_kotlinpsi_MainActivity_Socket_1Client(JNIEnv *env, jobject thiz, jstring message) {
     return 1;
 }

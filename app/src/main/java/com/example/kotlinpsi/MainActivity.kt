@@ -1,6 +1,7 @@
 package com.example.kotlinpsi
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -18,9 +19,29 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
+        //binding.sampleText.text = stringFromJNI()
         //Log.d(TAG, "Boringtest: "+Boringtest())
-        CryptoMessage("test","teat")
+
+        val psibutton=binding.psiStart
+        psibutton.setOnClickListener {
+            val server_mes=binding.serverMessage.getText().toString()
+            val client_mes=binding.clientMessage.getText().toString()
+            val result = OneCryptoMessage(server_mes,client_mes)
+            val intent: Intent = Intent(this,PSIAfterActivity::class.java)
+            intent.putExtra(server_intent_message,server_mes)
+            intent.putExtra(client_intent_message,client_mes)
+            intent.putExtra(psi_intent_message,result)
+            startActivity(intent)
+        }
+
+        val serbutton=binding.serverPsi
+        serbutton.setOnClickListener {
+            Log.d(TAG, "onCreate: push server psi button")
+        }
+        val clibutton=binding.clientPsi
+        clibutton.setOnClickListener {
+            Log.d(TAG, "onCreate: push client psi button")
+        }
     }
 
     /**
@@ -31,13 +52,24 @@ class MainActivity : AppCompatActivity() {
 
     external fun Boringtest(): Int
 
-    //与えられた文字列を暗号化(楕円曲線鍵暗号)
-    external fun CryptoMessage(message:String,message_cl:String): Int
+    //1端末でPSIのデモ
+    external fun OneCryptoMessage(message:String,message_cl:String): String
+
+    //2端末間での通信(サーバ側)
+    external fun Socket_Server(message: String): Int
+
+    //2端末間での通信(クライアント側)
+    //クライアント側は常時実行される必要がある?
+    external fun Socket_Client(message: String): Int
+
 
     companion object {
         // Used to load the 'kotlinpsi' library on application startup.
         init {
             System.loadLibrary("kotlinpsi")
         }
+        val server_intent_message = "SERVRMESSAGE"
+        val client_intent_message = "CLIENTMESSAGE"
+        val psi_intent_message = "PSIRESULT"
     }
 }
