@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,5 +72,8 @@ class MainActivity : AppCompatActivity() {
         val server_intent_message = "SERVRMESSAGE"
         val client_intent_message = "CLIENTMESSAGE"
         val psi_intent_message = "PSIRESULT"
+
+
+        public lateinit var test:String
     }
 }

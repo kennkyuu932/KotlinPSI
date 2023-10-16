@@ -17,6 +17,27 @@ Java_com_example_kotlinpsi_MainActivity_Boringtest(JNIEnv *env, jobject thiz) {
     return nid;
 }
 
+
+void ec_point_to_binary(const EC_GROUP *group, const EC_POINT *point, unsigned char **out, size_t *out_len, BN_CTX *ctx) {
+    size_t len = EC_POINT_point2oct(group, point, POINT_CONVERSION_UNCOMPRESSED, nullptr, 0, ctx);
+    *out = new unsigned char[len];
+    EC_POINT_point2oct(group, point, POINT_CONVERSION_UNCOMPRESSED, *out, len, ctx);
+    *out_len = len;
+}
+
+EC_POINT *binary_to_ec_point(const EC_GROUP *group, const unsigned char *binaryData, size_t binaryDataLen, BN_CTX *ctx) {
+    EC_POINT *point = EC_POINT_new(group);
+
+    // バイナリデータをEC_POINT型に変換
+    if (EC_POINT_oct2point(group, point, binaryData, binaryDataLen, ctx) != 1) {
+        // 変換に失敗した場合のエラーハンドリングを行う
+        EC_POINT_free(point);
+        return nullptr;
+    }
+
+    return point;
+}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject thiz, jstring message,jstring message_cl) {
@@ -50,11 +71,19 @@ Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject th
     }
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","crypto message use pri_key_point");
     r= EC_POINT_mul(ec_group,ps,pri_key_point,inf,&zero,ctx);
+    unsigned char *px_binary[nx];
+    size_t binary_len[nx];
     for(i=0;i<nx;i++){
         px[i]= EC_POINT_new(ec_group);
         r= EC_POINT_mul(ec_group,px[i],
                         &zero,ps,&x[i],
                         ctx);
+        ec_point_to_binary(ec_group,px[i],&px_binary[i],&binary_len[i],ctx);
+    }
+
+    EC_POINT *px_binary_ec[nx];
+    for(i=0;i<nx;i++){
+        px_binary_ec[i]= binary_to_ec_point(ec_group,px_binary[i],binary_len[i],ctx);
     }
     //
 
@@ -146,7 +175,7 @@ Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject th
  * 上記の二重ループにすると"test"と"teat"を比較したときに"test"の2回目の"t"と"teat"の最初の"t"が共通要素になってしまう
  */
     for(i_cl=0;i_cl<nx_cl;i_cl++){
-        if(EC_POINT_cmp(ec_group_cl,px[i_cl],pxy_enc[i_cl],ctx_cl)==0){
+        if(EC_POINT_cmp(ec_group_cl,px_binary_ec[i_cl],pxy_enc[i_cl],ctx_cl)==0){
             __android_log_print(ANDROID_LOG_DEBUG,"cpp","psi: %c",mes_cl[i_cl]);
             result+=mes_cl[i_cl];
         }
