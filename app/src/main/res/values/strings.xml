@@ -6,4 +6,11 @@
     <string name="textview">TextView</string>
     <string name="client">client</string>
     <string name="server">server</string>
+    <string name="add_data">Database</string>
+    <string name="add">add</string>
+    <string name="date">date</string>
+    <string name="name">name</string>
+    <string name="time">time</string>
+    <string name="all_delete">All delete</string>
+    <string name="delete">delete</string>
 </resources>

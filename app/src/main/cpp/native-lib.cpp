@@ -78,9 +78,11 @@ Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject th
         r= EC_POINT_mul(ec_group,px[i],
                         &zero,ps,&x[i],
                         ctx);
+        //バイナリデータに変換
         ec_point_to_binary(ec_group,px[i],&px_binary[i],&binary_len[i],ctx);
     }
 
+    //バイナリデータをEC_POINTに変換
     EC_POINT *px_binary_ec[nx];
     for(i=0;i<nx;i++){
         px_binary_ec[i]= binary_to_ec_point(ec_group,px_binary[i],binary_len[i],ctx);

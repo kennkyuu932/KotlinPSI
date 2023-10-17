@@ -8,6 +8,15 @@ AndroidでBoringSSLを用いてPSIを行うアプリ
 
 ・ダミーの接触履歴の共通要素を求める．
 
+2023/10/17
+
+Roomを用いたデータベースを扱えるようにした．
+
+手動で3つの文字列型データ(`date:String,time:String,name:String`)の追加，
+データの削除ができるようになった．
+
+(コルーチンがよくわからなかったためAsyncTask.executeを使用した．)
+
 2023/10/16
 
 通信を行うために`EC_POINT`型のデータをバイナリ形式(`unsigned char *`)に変更可能にした．

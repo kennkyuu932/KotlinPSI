@@ -23,6 +23,12 @@ class MainActivity : AppCompatActivity() {
         //binding.sampleText.text = stringFromJNI()
         //Log.d(TAG, "Boringtest: "+Boringtest())
 
+        val database = binding.toAdddata
+        database.setOnClickListener {
+            val intent=Intent(this,AddDataActivity::class.java)
+            startActivity(intent)
+        }
+
         val psibutton=binding.psiStart
         psibutton.setOnClickListener {
             val server_mes=binding.serverMessage.getText().toString()
