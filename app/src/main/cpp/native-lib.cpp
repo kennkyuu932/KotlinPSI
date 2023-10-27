@@ -3,6 +3,8 @@
 #include <android/log.h>
 #include "include/openssl/ssl.h"
 
+EC_KEY *ec_key_psi;
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_kotlinpsi_MainActivity_stringFromJNI(
         JNIEnv* env,
@@ -221,13 +223,100 @@ Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject th
 }
 
 
-extern "C"
-JNIEXPORT jint JNICALL
-Java_com_example_kotlinpsi_MainActivity_Socket_1Server(JNIEnv *env, jobject thiz, jstring message) {
-    return 1;
+//extern "C"
+//JNIEXPORT jint JNICALL
+//Java_com_example_kotlinpsi_MainActivity_Socket_1Server(JNIEnv *env, jobject thiz, jstring message) {
+//    return 1;
+//}
+//extern "C"
+//JNIEXPORT jint JNICALL
+//Java_com_example_kotlinpsi_MainActivity_Socket_1Client(JNIEnv *env, jobject thiz, jstring message) {
+//    return 1;
+//}
+jbyteArray Char_to_bytearray(JNIEnv *env,unsigned char* buf,int len){
+    jbyteArray array=env->NewByteArray(len);
+    env->SetByteArrayRegion(array,0,len,reinterpret_cast<jbyte*>(buf));
+    return array;
 }
+
+
+
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_example_kotlinpsi_MainActivity_Socket_1Client(JNIEnv *env, jobject thiz, jstring message) {
-    return 1;
+JNIEXPORT void JNICALL
+Java_com_example_kotlinpsi_Transmission_ServerActivity_ServerFirstPSI(JNIEnv *env, jobject thiz,jstring mes) {
+    //PSIのサーバ側1段階目
+    //自分の持つ集合を暗号化する
+    const char *message=env->GetStringUTFChars(mes,nullptr);
+    ec_key_psi = EC_KEY_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_KEY_generate_key(ec_key_psi);
+    const EC_GROUP *ec_group = EC_KEY_get0_group(ec_key_psi);
+    const BIGNUM *pri_key_point = EC_KEY_get0_private_key(ec_key_psi);
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    int nx= strlen(message);
+    EC_POINT *px[nx];
+    BIGNUM x[nx];
+    int i;
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","set message to BIGNUM");
+    for (i=0;i<nx;i++){
+        BN_init(&x[i]);
+        BN_set_word(&x[i],(BN_ULONG)message[i]);
+    }
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","crypto message use pri_key_point");
+    r= EC_POINT_mul(ec_group,ps,pri_key_point,inf,&zero,ctx);
+    unsigned char *px_binary[nx];
+    size_t binary_len[nx];
+    for(i=0;i<nx;i++){
+        px[i]= EC_POINT_new(ec_group);
+        r= EC_POINT_mul(ec_group,px[i],
+                        &zero,ps,&x[i],
+                        ctx);
+        //バイナリデータに変換
+        ec_point_to_binary(ec_group,px[i],&px_binary[i],&binary_len[i],ctx);
+    }
+
+    //メモリ開放
+    for(i=0;i<nx;i++){
+        EC_POINT_free(px[i]);
+        BN_free(&x[i]);
+    }
+    EC_POINT_free(ps);
+    EC_POINT_free(inf);
+    BN_free(&zero);
+    BN_CTX_free(ctx);
+
+
+    jclass byteArrayClass = env->FindClass("[B"); // byte配列のクラスを取得
+    jobjectArray result = env->NewObjectArray(nx, byteArrayClass, nullptr); // nxの要素を持つjobjectArrayを作成
+
+
+    for(i=0;i<nx;i++){
+//        jbyteArray temp= Char_to_bytearray(env,px_binary[i],binary_len[i]);
+//        env->SetObjectArrayElement(result,i,temp);
+        env->SetObjectArrayElement(result,i, Char_to_bytearray(env,px_binary[i],binary_len[i]));
+//        env->DeleteLocalRef(temp);
+    }
+
+
+
+//
+//
+//    // unsigned char *A[n]の各要素をJavaのbyte配列にコピーする
+//    for (i = 0; i < nx; i++) {
+//        jbyteArray byteArray = env->NewByteArray(binary_len[i]); // nは各unsigned char *のサイズ
+//        env->SetByteArrayRegion(byteArray, 0, nx, reinterpret_cast<jbyte*>(px_binary[i])); // unsigned char *をbyte配列にコピー
+//        env->SetObjectArrayElement(result, i, byteArray); // jobjectArrayの要素として設定
+//        env->DeleteLocalRef(byteArray); // ローカル参照を解放
+//    }
+
+    jclass clazz = env->GetObjectClass(thiz);
+    jmethodID methodId = env->GetMethodID(clazz,"FirstAfter","([[B[I)V");
+    if (methodId!= nullptr){
+        env->CallVoidMethod(thiz,methodId,result,binary_len);
+    }
 }

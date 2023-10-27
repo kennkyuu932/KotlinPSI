@@ -1,10 +1,11 @@
-package com.example.kotlinpsi
+package com.example.kotlinpsi.Database
 
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import com.example.kotlinpsi.R
 
 class AddDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,7 @@ class AddDataActivity : AppCompatActivity() {
             val edittime=findViewById<EditText>(R.id.editTexttime).getText().toString()
             val editname=findViewById<EditText>(R.id.editTextname).getText().toString()
             AsyncTask.execute {
-                val db=ContactDatabase.getInstance(this)
+                val db= ContactDatabase.getInstance(this)
                 db.contactDao().insertContact(Contact(date = editdate, time = edittime, name = editname))
             }
         }
@@ -30,14 +31,14 @@ class AddDataActivity : AppCompatActivity() {
             val edittime=findViewById<EditText>(R.id.editTexttime).getText().toString()
             val editname=findViewById<EditText>(R.id.editTextname).getText().toString()
             AsyncTask.execute {
-                val db=ContactDatabase.getInstance(this)
+                val db= ContactDatabase.getInstance(this)
                 db.contactDao().deleteContact(Contact(date = editdate, time = edittime, name = editname))
             }
         }
 
         deleteAllbutton.setOnClickListener {
             AsyncTask.execute {
-                val db=ContactDatabase.getInstance(this)
+                val db= ContactDatabase.getInstance(this)
                 db.contactDao().deleteContactAll()
             }
         }

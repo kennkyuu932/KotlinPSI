@@ -1,4 +1,4 @@
-package com.example.kotlinpsi
+package com.example.kotlinpsi.Database
 
 import androidx.room.Dao
 import androidx.room.Delete

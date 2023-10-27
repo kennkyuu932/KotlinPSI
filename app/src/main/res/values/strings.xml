@@ -13,4 +13,5 @@
     <string name="time">time</string>
     <string name="all_delete">All delete</string>
     <string name="delete">delete</string>
+    <string name="server_s_ip_adress">Server\'s IP Adress</string>
 </resources>

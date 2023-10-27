@@ -1,4 +1,4 @@
-package com.example.kotlinpsi
+package com.example.kotlinpsi.Database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
