@@ -1,7 +1,6 @@
 package com.example.kotlinpsi.Database
 
 import androidx.room.TypeConverter
-import java.sql.Date
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

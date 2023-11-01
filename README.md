@@ -16,7 +16,7 @@ RoomでLocalDateTimeを使用可能にするためにContactConverter.ktファ�
 
 手動でデータを入力する際はDatePicker,TimePickerを使用している．
 
-プログラム上ではDatePickerのほうが先に記述しているが，TimePickerのほうが先に起動するため，それぞれに`editdatetext.setText()`を行っている．(スレッドなどの問題?)
+プログラム上ではDatePickerのほうが先に記述しているが，TimePickerのほうが先に起動するため，それぞれで`editdatetext.setText()`を行っている．(スレッドなどの問題?)
 
 データベースに格納する際にtry-catchを行うようにした．
 
