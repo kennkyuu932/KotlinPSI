@@ -10,7 +10,6 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.ServerSocket
 import java.net.Socket
-import kotlin.math.log
 
 object Control {
 
@@ -33,11 +32,6 @@ object Control {
             ser_serversoc= ServerSocket(PORT)
             ser_serversoc?.reuseAddress=true
             Log.d(TAG, "ServerConnect: try")
-//            while (true){
-//                Log.d(TAG, "ServerConnect: while1")
-//                ser_socket= ser_serversoc?.accept()
-//                Log.d(TAG, "ServerConnect: while")
-//            }
             ser_socket= ser_serversoc?.accept()
             Log.d(TAG, "ServerConnect: finish")
         }catch (_:Exception){}

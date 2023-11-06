@@ -34,8 +34,8 @@ class MainActivity : AppCompatActivity() {
 
         val psibutton=binding.psiStart
         psibutton.setOnClickListener {
-            val server_mes=binding.serverMessage.getText().toString()
-            val client_mes=binding.clientMessage.getText().toString()
+            val server_mes=binding.serverMessage.text.toString()
+            val client_mes=binding.clientMessage.text.toString()
             val result=OneCryptoMessage(server_mes,client_mes)
             val intent: Intent = Intent(this,PSIAfterActivity::class.java)
             intent.putExtra(server_intent_message,server_mes)
