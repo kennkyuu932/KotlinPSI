@@ -72,12 +72,6 @@ class MainActivity : AppCompatActivity() {
     //1端末でPSIのデモ
     external fun OneCryptoMessage(message:String,message_cl:String): String
 
-//    //2端末間での通信(サーバ側)
-//    external fun Socket_Server(message: String): Int
-//
-//    //2端末間での通信(クライアント側)
-//    //クライアント側は常時実行される必要がある?
-//    external fun Socket_Client(message: String): Int
 
 
     companion object {

@@ -8,13 +8,18 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.kotlinpsi.R
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 class AddDataActivity : AppCompatActivity() {
+
+    private lateinit var viewModel:ContactViewModel
 
     lateinit var editdate:EditText
     lateinit var editname:EditText
@@ -28,6 +33,23 @@ class AddDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_data)
+
+        viewModel = ViewModelProvider(this).get(ContactViewModel::class.java)
+
+        viewModel.mutabledata.observe(this, Observer {value ->
+            if (value==0){
+                Toast.makeText(this,"失敗", Toast.LENGTH_SHORT).show()
+            }
+            if(value==1){
+                Toast.makeText(this,"要素を追加", Toast.LENGTH_SHORT).show()
+            }
+            if(value==2){
+                Toast.makeText(this,"要素を削除", Toast.LENGTH_SHORT).show()
+            }
+            if(value==3){
+                Toast.makeText(this,"テーブルを削除", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         val addbutton=findViewById<Button>(R.id.add_database)
         val delbutton=findViewById<Button>(R.id.delete_one)
@@ -83,16 +105,12 @@ class AddDataActivity : AppCompatActivity() {
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     val roomdate=LocalDateTime.parse(editdatetext,formatter)
                     db.contactDao().insertContact(Contact(date=roomdate,name=editnametext))
-//                    databaseflag=true
+                    viewModel.changeflag(1)
                 }catch (_:Exception){
                     Log.d(TAG, "addData: miss")
-//                    databaseflag=false
+                    viewModel.changeflag(0)
                 }
             }
-//            if(!databaseflag){
-//                Toast.makeText(applicationContext,"データベースへの入力に失敗",Toast.LENGTH_SHORT)
-//                    .show()
-//            }
         }
 
         delbutton.setOnClickListener {
@@ -104,16 +122,12 @@ class AddDataActivity : AppCompatActivity() {
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     val roomdate=LocalDateTime.parse(editdatetext,formatter)
                     db.contactDao().deleteContact(Contact(date=roomdate,name=editnametext))
-//                    databaseflag=true
+                    viewModel.changeflag(2)
                 }catch (_:Exception){
                     Log.d(TAG, "deleteData: miss")
-//                    databaseflag=false
+                    viewModel.changeflag(0)
                 }
             }
-//            if (!databaseflag) {
-//                Toast.makeText(applicationContext, "データベース内の要素の削除に失敗", Toast.LENGTH_SHORT)
-//                    .show()
-//            }
         }
 
         deleteAllbutton.setOnClickListener {
@@ -121,16 +135,12 @@ class AddDataActivity : AppCompatActivity() {
                 try {
                     val db= ContactDatabase.getInstance(this)
                     db.contactDao().deleteContactAll()
-//                    databaseflag=true
+                    viewModel.changeflag(3)
                 }catch (_:Exception){
                     Log.d(TAG, "deleteTable: miss")
-//                    databaseflag=false
+                    viewModel.changeflag(0)
                 }
             }
-//            if (!databaseflag){
-//                Toast.makeText(applicationContext,"テーブルの削除に失敗",Toast.LENGTH_SHORT)
-//                    .show()
-//            }
         }
     }
 }

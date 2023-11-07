@@ -20,16 +20,16 @@ Java_com_example_kotlinpsi_MainActivity_Boringtest(JNIEnv *env, jobject thiz) {
 }
 
 
-bool ec_point_to_binary(const EC_GROUP *group, const EC_POINT *point, unsigned char **out, size_t *out_len, BN_CTX *ctx) {
+bool ec_point_to_binary(const EC_GROUP *group, const EC_POINT *point, uint8_t **out, size_t *out_len, BN_CTX *ctx) {
     size_t len = EC_POINT_point2oct(group, point, POINT_CONVERSION_UNCOMPRESSED, nullptr, 0, ctx);
-    *out = new unsigned char[len];
+    *out = new uint8_t [len];
     if(!EC_POINT_point2oct(group, point, POINT_CONVERSION_UNCOMPRESSED, *out, len, ctx))
         return false;
     *out_len = len;
     return true;
 }
 
-EC_POINT *binary_to_ec_point(const EC_GROUP *group, const unsigned char *binaryData, size_t binaryDataLen, BN_CTX *ctx) {
+EC_POINT *binary_to_ec_point(const EC_GROUP *group, const uint8_t *binaryData, size_t binaryDataLen, BN_CTX *ctx) {
     EC_POINT *point = EC_POINT_new(group);
     // バイナリデータをEC_POINT型に変換
     if (EC_POINT_oct2point(group, point, binaryData, binaryDataLen, ctx) != 1) {
@@ -224,16 +224,6 @@ Java_com_example_kotlinpsi_MainActivity_OneCryptoMessage(JNIEnv *env, jobject th
 }
 
 
-//extern "C"
-//JNIEXPORT jint JNICALL
-//Java_com_example_kotlinpsi_MainActivity_Socket_1Server(JNIEnv *env, jobject thiz, jstring message) {
-//    return 1;
-//}
-//extern "C"
-//JNIEXPORT jint JNICALL
-//Java_com_example_kotlinpsi_MainActivity_Socket_1Client(JNIEnv *env, jobject thiz, jstring message) {
-//    return 1;
-//}
 jbyteArray Char_to_bytearray(JNIEnv *env,unsigned char* buf,int len){
     jbyteArray array=env->NewByteArray(len);
     env->SetByteArrayRegion(array,0,len,reinterpret_cast<jbyte*>(buf));
@@ -242,87 +232,6 @@ jbyteArray Char_to_bytearray(JNIEnv *env,unsigned char* buf,int len){
 
 
 
-//extern "C"
-//JNIEXPORT void JNICALL
-//Java_com_example_kotlinpsi_Transmission_ServerActivity_ServerFirstPSI(JNIEnv *env, jobject thiz,jstring mes) {
-//    //PSIのサーバ側1段階目
-//    //自分の持つ集合を暗号化する
-//    //テストでは1つの文字列(test)であるためクライアントはtestかどうかを判断することになる
-//    const char *message=env->GetStringUTFChars(mes,nullptr);
-//    ec_key_psi = EC_KEY_new_by_curve_name(EC_curve_nist2nid("P-256"));
-//    EC_KEY_generate_key(ec_key_psi);
-//    const EC_GROUP *ec_group = EC_KEY_get0_group(ec_key_psi);
-//    const BIGNUM *pri_key_point = EC_KEY_get0_private_key(ec_key_psi);
-//    EC_POINT *ps= EC_POINT_new(ec_group);
-//    EC_POINT *inf= EC_POINT_new(ec_group);
-//    int r = EC_POINT_set_to_infinity(ec_group,inf);
-//    BN_CTX *ctx = BN_CTX_new();
-//    BIGNUM zero;
-//    BN_init(&zero);
-//    BN_zero(&zero);
-////    int nx= strlen(message);
-//    int nx = 1;
-//    EC_POINT *px[nx];
-//    BIGNUM x[nx];
-//    int i;
-//    __android_log_print(ANDROID_LOG_DEBUG,"cpp","set message to BIGNUM");
-////    for (i=0;i<nx;i++){
-////        BN_init(&x[i]);
-////        BN_set_word(&x[i],(BN_ULONG)message[i]);
-////    }
-//    BN_init(&x[0]);
-//    BN_set_word(&x[0],(BN_ULONG)message);
-//    __android_log_print(ANDROID_LOG_DEBUG,"cpp","crypto message use pri_key_point");
-//    r= EC_POINT_mul(ec_group,ps,pri_key_point,inf,&zero,ctx);
-//    unsigned char *px_binary[nx];
-//    size_t binary_len[nx];
-////    for(i=0;i<nx;i++){
-////        px[i]= EC_POINT_new(ec_group);
-////        r= EC_POINT_mul(ec_group,px[i],
-////                        &zero,ps,&x[i],
-////                        ctx);
-////        //バイナリデータに変換
-////        ec_point_to_binary(ec_group,px[i],&px_binary[i],&binary_len[i],ctx);
-////    }
-//    px[0]= EC_POINT_new(ec_group);
-//    r= EC_POINT_mul(ec_group,px[0],
-//                    &zero,ps,&x[0],
-//                    ctx);
-//    //バイナリデータに変換
-//    ec_point_to_binary(ec_group,px[0],&px_binary[0],&binary_len[0],ctx);
-//
-//    //メモリ開放
-//    for(i=0;i<nx;i++){
-//        EC_POINT_free(px[i]);
-//        BN_free(&x[i]);
-//    }
-//    EC_POINT_free(ps);
-//    EC_POINT_free(inf);
-//    BN_free(&zero);
-//    BN_CTX_free(ctx);
-//
-//
-//    jbyteArray result = env->NewByteArray(nx);
-//
-//
-//
-//
-////
-////
-////    // unsigned char *A[n]の各要素をJavaのbyte配列にコピーする
-////    for (i = 0; i < nx; i++) {
-////        jbyteArray byteArray = env->NewByteArray(binary_len[i]); // nは各unsigned char *のサイズ
-////        env->SetByteArrayRegion(byteArray, 0, nx, reinterpret_cast<jbyte*>(px_binary[i])); // unsigned char *をbyte配列にコピー
-////        env->SetObjectArrayElement(result, i, byteArray); // jobjectArrayの要素として設定
-////        env->DeleteLocalRef(byteArray); // ローカル参照を解放
-////    }
-//
-//    jclass clazz = env->GetObjectClass(thiz);
-//    jmethodID methodId = env->GetMethodID(clazz,"FirstAfter","([B[I)V");
-//    if (methodId!= nullptr){
-//        env->CallVoidMethod(thiz,methodId,result,binary_len);
-//    }
-//}
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_kotlinpsi_Transmission_ServerActivity_createKey(JNIEnv *env, jobject thiz,
@@ -341,6 +250,7 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_createKey(JNIEnv *env, jo
     env->SetByteArrayRegion(key,0,len_j,(jbyte *)pri_key_byte);
     return true;
 }
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, jobject thiz,
@@ -369,37 +279,58 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
     BN_init(&zero);
     BN_zero(&zero);
 //    int nx= strlen(mes);
-    int nx = 1; //mesの文字列の数(現状では"test"の一単語)
-    EC_POINT *px[nx];
-    BIGNUM x[nx];
+//    int nx = 1; //mesの文字列の数(現状では"test"の一単語)
+    EC_POINT *px;
+    BIGNUM x;
     int i;
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","set message to BIGNUM");
-    for (i=0;i<nx;i++){
-        BN_init(&x[i]);
-        BN_set_word(&x[i],(BN_ULONG)mes);
-    }
+    BN_init(&x);
+    BN_set_word(&x,(BN_ULONG)mes);
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","crypto message use pri_key_point");
+    //ps=generator*pri_key+inf*0=generator*pri_key?
     r= EC_POINT_mul(ec_group,ps,pri_key,inf,&zero,ctx);
-    unsigned char *px_binary[nx];
-    size_t binary_len[nx];
-    for(i=0;i<nx;i++){
-        px[i]= EC_POINT_new(ec_group);
-        r= EC_POINT_mul(ec_group,px[i],
-                        &zero,ps,&x[i],
-                        ctx);
-        __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt message NO.%d",i);
-        //バイナリデータに変換
-        if(!ec_point_to_binary(ec_group,px[i],&px_binary[i],&binary_len[i],ctx)) {
-            __android_log_print(ANDROID_LOG_DEBUG,"cpp","ecpoint to binary false");
-            return false;
-        }
+    uint8_t *px_binary;
+    size_t binary_len;
+    px= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,px,
+                    &zero,ps,&x,
+                    ctx); //px[i]=generator*0+ps*x[i]=ps*x[i] ps:privatekey(EC_POINT),x[i]:message(BIGNUM)
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt message ");
+    //バイナリデータに変換
+    if(!ec_point_to_binary(ec_group,px,&px_binary,&binary_len,ctx)) {
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","ecpoint to binary false");
+        return false;
     }
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt and exchange ecpoint to byte");
-//    env->SetByteArrayRegion(out,0,binary_len[0],(jbyte *)px_binary[0]);
+    env->SetByteArrayRegion(out,0,binary_len,(jbyte *)px_binary);
     //バイナリデータをEC_POINTに変換
-    EC_POINT *px_binary_ec[nx];
-    for(i=0;i<nx;i++){
-        px_binary_ec[i]= binary_to_ec_point(ec_group,px_binary[i],binary_len[i],ctx);
-    }
+    EC_POINT *px_binary_ec;
+    px_binary_ec= binary_to_ec_point(ec_group,px_binary,binary_len,ctx);
+
+
+    //逆元の計算
+    EC_POINT *pxy_enc;
+    EC_POINT *px_reenc;
+    BIGNUM cl_key_inverse;
+    int out_no_inverse;
+    BN_CTX *bnCtx;
+    BN_MONT_CTX *bnMontCtx;
+    BN_init(&cl_key_inverse);
+    bnCtx=BN_CTX_new();
+    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),bnCtx);
+    r= BN_mod_inverse_blinded(&cl_key_inverse,&out_no_inverse,pri_key,bnMontCtx,bnCtx);
+    int ec_cmp_flag;
+    pxy_enc= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group, pxy_enc,
+                    &zero, px, &cl_key_inverse,
+                    ctx);
+    //pxy_enc=generator*0+px*cl_key_inverse=px*cl_key_inverse
+    //px=pxy_enc/cl_key_inverse=pxy_enc*pri_key
+//    r= EC_POINT_mul(ec_group,px_reenc,&zero,pxy_enc,pri_key,bnCtx);
+//    ec_cmp_flag=EC_POINT_cmp(ec_group,px_reenc,px,bnCtx);
+//    if(ec_cmp_flag==0){
+//        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
+//    }
+
     return true;
 }
