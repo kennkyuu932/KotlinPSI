@@ -8,6 +8,22 @@ AndroidでBoringSSLを用いてPSIを行うアプリ
 
 ・ダミーの接触履歴の共通要素を求める．
 
+2023/11/16
+
+PSIを計算するときにroomから取り出した集合を暗号化できるようにした．
+
+roomから取り出した"yyyy-MM-dd'T'HH:mm"のLocalDateTime型のdate要素をtoString()でStringにしてnativeC++に渡している．
+
+実際にC++側に渡すメッセージはContact(date=2023-11-16T13:06, name=44)のような形になる．
+
+roomの構成を変更．
+
+AsyncTaskを使って操作していたが，lifecyclescopeなどを使用してroomを操作することができるようになった．
+
+非推奨だったAsynkTaskを使わなくなり，Coroutineを使うようになった．
+
+roomの変更に伴い，ContactRepository.ktとContactApplication.ktを追加
+
 2023/11/07
 
 roomのデータベースを操作したときに操作の内容に応じてトーストを表示させるようにした．

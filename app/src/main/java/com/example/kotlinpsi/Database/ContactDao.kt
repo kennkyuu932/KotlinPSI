@@ -12,14 +12,14 @@ interface ContactDao {
     fun getAllContacts(): Flow<List<Contact>>
 
     @Insert
-    fun insertContact(contact: Contact)
+    suspend fun insertContact(contact: Contact)
 
     @Delete
-    fun deleteContact(contact: Contact)
+    suspend fun deleteContact(contact: Contact)
 
     @Query("DELETE FROM Contact_history_table")
-    fun deleteContactAll()
+    suspend fun deleteContactAll()
 
-    @Query("SELECT * FROM Contact_history_table")
-    fun getAllList(): List<Contact>
+//    @Query("SELECT * FROM Contact_history_table")
+//    fun getAllList(): List<Contact>
 }
