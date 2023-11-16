@@ -2,6 +2,7 @@
 #include <string>
 #include <android/log.h>
 #include "include/openssl/ssl.h"
+#include "include/openssl/aes.h"
 
 //EC_KEY *ec_key_psi;
 
@@ -310,15 +311,15 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
 
     //逆元の計算
     EC_POINT *pxy_enc;
-    EC_POINT *px_reenc;
+    EC_POINT *px_reenc= EC_POINT_new(ec_group);
     BIGNUM cl_key_inverse;
     int out_no_inverse;
-    BN_CTX *bnCtx;
+//    BN_CTX *bnCtx;
     BN_MONT_CTX *bnMontCtx;
     BN_init(&cl_key_inverse);
-    bnCtx=BN_CTX_new();
-    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),bnCtx);
-    r= BN_mod_inverse_blinded(&cl_key_inverse,&out_no_inverse,pri_key,bnMontCtx,bnCtx);
+//    bnCtx=BN_CTX_new();
+    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),ctx);
+    r= BN_mod_inverse_blinded(&cl_key_inverse,&out_no_inverse,pri_key,bnMontCtx,ctx);
     int ec_cmp_flag;
     pxy_enc= EC_POINT_new(ec_group);
     r= EC_POINT_mul(ec_group, pxy_enc,
@@ -326,11 +327,26 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
                     ctx);
     //pxy_enc=generator*0+px*cl_key_inverse=px*cl_key_inverse
     //px=pxy_enc/cl_key_inverse=pxy_enc*pri_key
-//    r= EC_POINT_mul(ec_group,px_reenc,&zero,pxy_enc,pri_key,bnCtx);
-//    ec_cmp_flag=EC_POINT_cmp(ec_group,px_reenc,px,bnCtx);
-//    if(ec_cmp_flag==0){
-//        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
-//    }
+    r= EC_POINT_mul(ec_group,px_reenc,&zero,pxy_enc,pri_key,ctx);
+    ec_cmp_flag=EC_POINT_cmp(ec_group,px_reenc,px,ctx);
+    if(ec_cmp_flag==0){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
+    }
 
     return true;
+}
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ServerActivity_aestest(JNIEnv *env, jobject thiz) {
+
+    //AESの出力確認
+    AES_KEY aesKey;
+    uint8_t key=255;
+    AES_set_encrypt_key(&key,16,&aesKey);
+
+    uint8_t aesin=25;
+    uint8_t aesout;
+    AES_encrypt(&aesin,&aesout,&aesKey);
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","aes test %u",aesout);
+
 }

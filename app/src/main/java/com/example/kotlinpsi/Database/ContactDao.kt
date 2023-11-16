@@ -19,4 +19,7 @@ interface ContactDao {
 
     @Query("DELETE FROM Contact_history_table")
     fun deleteContactAll()
+
+    @Query("SELECT * FROM Contact_history_table")
+    fun getAllList(): List<Contact>
 }

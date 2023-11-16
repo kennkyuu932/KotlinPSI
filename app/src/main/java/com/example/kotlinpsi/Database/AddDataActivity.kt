@@ -12,7 +12,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.kotlinpsi.MainActivity
 import com.example.kotlinpsi.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -57,6 +61,7 @@ class AddDataActivity : AppCompatActivity() {
         val datepick=findViewById<Button>(R.id.date_pick)
         editdate=findViewById(R.id.editTextdate)
         editname=findViewById(R.id.editTextname)
+        val db= ContactDatabase.getInstance(this)
         datepick.setOnClickListener {
             val calendar = Calendar.getInstance()
             val currentYear = calendar.get(Calendar.YEAR)
@@ -99,9 +104,8 @@ class AddDataActivity : AppCompatActivity() {
         addbutton.setOnClickListener {
             val editdatetext=editdate.text.toString()
             val editnametext=editname.text.toString()
-            AsyncTask.execute {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val db= ContactDatabase.getInstance(this)
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     val roomdate=LocalDateTime.parse(editdatetext,formatter)
                     db.contactDao().insertContact(Contact(date=roomdate,name=editnametext))
@@ -116,9 +120,8 @@ class AddDataActivity : AppCompatActivity() {
         delbutton.setOnClickListener {
             val editdatetext=editdate.text.toString()
             val editnametext=editname.text.toString()
-            AsyncTask.execute {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val db= ContactDatabase.getInstance(this)
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     val roomdate=LocalDateTime.parse(editdatetext,formatter)
                     db.contactDao().deleteContact(Contact(date=roomdate,name=editnametext))
@@ -131,9 +134,8 @@ class AddDataActivity : AppCompatActivity() {
         }
 
         deleteAllbutton.setOnClickListener {
-            AsyncTask.execute {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val db= ContactDatabase.getInstance(this)
                     db.contactDao().deleteContactAll()
                     viewModel.changeflag(3)
                 }catch (_:Exception){

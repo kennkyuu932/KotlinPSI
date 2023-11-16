@@ -12,10 +12,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.kotlinpsi.Database.AddDataActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.kotlinpsi.Database.Contact
 import com.example.kotlinpsi.Database.ContactDatabase
 import com.example.kotlinpsi.Database.ContactViewModel
+import com.example.kotlinpsi.MainActivity
 import com.example.kotlinpsi.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.net.Inet4Address
 
 class ServerActivity : AppCompatActivity() {
@@ -23,7 +28,11 @@ class ServerActivity : AppCompatActivity() {
     val pri_key_len=32
     val ec_point_length=65
 
-    private lateinit var viwmodel:ContactViewModel
+    private lateinit var viewmodel:ContactViewModel
+
+    lateinit var roomlist:Flow<List<Contact>>
+
+    lateinit var roomlist2:List<Contact>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,41 +52,52 @@ class ServerActivity : AppCompatActivity() {
         }
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
 
-        viwmodel = ViewModelProvider(this).get(ContactViewModel::class.java)
-        viwmodel.mutabledata.observe(this, Observer { value ->
+        viewmodel = ViewModelProvider(this).get(ContactViewModel::class.java)
+        viewmodel.mutabledata.observe(this, Observer { value ->
             if(value==0){
                 Log.d(TAG, "onCreate: value = $value stop PSI")
                 Toast.makeText(this,"データベースの取得に失敗",Toast.LENGTH_SHORT).show()
             }
             if(value==4){
                 Log.d(TAG, "onCreate: value = $value start PSI")
+                Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
+
+//                Log.d(TAG, "onCreate: PSIStart")
+
+                val pri_key_kt:ByteArray = ByteArray(pri_key_len)
+                val f=createKey(pri_key_kt)
+
+                val n=1 //要素数
+                val test:String="test"
+                val enc_mes:ByteArray=ByteArray(ec_point_length)
+                val e=encryptSet(test,pri_key_kt, enc_mes)
+                if(e) {
+                    Log.d(TAG, "onCreate: Back Kotlin finish encrypt message")
+                }
+
             }
         })
 
-        AsyncTask.execute {
+        val db=ContactDatabase.getInstance(this)
+
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 Log.d(TAG, "onCreate: start room")
-                val db=ContactDatabase.getInstance(AddDataActivity())
-                val roomlist=db.contactDao().getAllContacts()
-                viwmodel.changeflag(4)
+//                roomlist=db.contactDao().getAllContacts()
+                //roomlist2=db.contactDao().getAllList()
+                viewmodel.changeflag(4)
             }catch (_:Exception){
                 Log.d(TAG, "onCreate: room get data miss")
-                viwmodel.changeflag(0)
+                viewmodel.changeflag(0)
             }
         }
 
-        Log.d(TAG, "onCreate: PSIStart")
 
-        val pri_key_kt:ByteArray = ByteArray(pri_key_len)
-        val f=createKey(pri_key_kt)
 
-        val n=1 //要素数
-        val test:String="test"
-        val enc_mes:ByteArray=ByteArray(ec_point_length)
-        val e=encryptSet(test,pri_key_kt, enc_mes)
-        if(e) {
-            Log.d(TAG, "onCreate: Back Kotlin finish encrypt message")
-        }
+
+
+//        aestest()
+
     }
 
 
@@ -86,6 +106,7 @@ class ServerActivity : AppCompatActivity() {
     external fun encryptSet(message: String,key: ByteArray,out: ByteArray):Boolean
 
 
+    external fun aestest():Boolean
 
 
     companion object{
