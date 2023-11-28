@@ -255,9 +255,16 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_createKey(JNIEnv *env, jo
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, jobject thiz,
-                                                                  jstring message, jbyteArray key,
+                                                                  jbyte message, jbyteArray key,
                                                                   jbyteArray out) {
-    const char *mes=env->GetStringUTFChars(message,nullptr);
+//    int mes_len=(int) env->GetArrayLength(message);
+//    uint8_t mes[mes_len];
+//    __android_log_print(ANDROID_LOG_DEBUG,"cpp","messagesize:%d", mes_len);
+//    env->GetByteArrayRegion(message,0,mes_len,(jbyte *)mes);
+//    for(int ab=0;ab<mes_len;ab++){
+//        __android_log_print(ANDROID_LOG_DEBUG,"cpp","%d",mes[ab]);
+//    }
+    uint8_t mes = (uint8_t) message;
     int len=(int) env->GetArrayLength(key);
     uint8_t pri_key_byte[len];
     env->GetByteArrayRegion(key,0,len,(jbyte *)pri_key_byte);
@@ -281,6 +288,9 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
     BN_zero(&zero);
 //    int nx= strlen(mes);
 //    int nx = 1; //mesの文字列の数(現状では"test"の一単語)
+//    //ByteArray<ByteArray>を返すか，一つのByteArrayの長さをメッセージごとに変えるか
+    //前者のほうが後々楽そう
+    //ByteArrayを返してkotlinで多次元配列のように加工する(二重ループになった)
     EC_POINT *px;
     BIGNUM x;
     int i;
@@ -295,7 +305,7 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
     px= EC_POINT_new(ec_group);
     r= EC_POINT_mul(ec_group,px,
                     &zero,ps,&x,
-                    ctx); //px[i]=generator*0+ps*x[i]=ps*x[i] ps:privatekey(EC_POINT),x[i]:message(BIGNUM)
+                    ctx);
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt message ");
     //バイナリデータに変換
     if(!ec_point_to_binary(ec_group,px,&px_binary,&binary_len,ctx)) {
@@ -304,34 +314,36 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSet(JNIEnv *env, j
     }
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt and exchange ecpoint to byte");
     env->SetByteArrayRegion(out,0,binary_len,(jbyte *)px_binary);
-    //バイナリデータをEC_POINTに変換
-    EC_POINT *px_binary_ec;
-    px_binary_ec= binary_to_ec_point(ec_group,px_binary,binary_len,ctx);
 
 
-    //逆元の計算
-    EC_POINT *pxy_enc;
-    EC_POINT *px_reenc= EC_POINT_new(ec_group);
-    BIGNUM cl_key_inverse;
-    int out_no_inverse;
-//    BN_CTX *bnCtx;
-    BN_MONT_CTX *bnMontCtx;
-    BN_init(&cl_key_inverse);
-//    bnCtx=BN_CTX_new();
-    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),ctx);
-    r= BN_mod_inverse_blinded(&cl_key_inverse,&out_no_inverse,pri_key,bnMontCtx,ctx);
-    int ec_cmp_flag;
-    pxy_enc= EC_POINT_new(ec_group);
-    r= EC_POINT_mul(ec_group, pxy_enc,
-                    &zero, px, &cl_key_inverse,
-                    ctx);
-    //pxy_enc=generator*0+px*cl_key_inverse=px*cl_key_inverse
-    //px=pxy_enc/cl_key_inverse=pxy_enc*pri_key
-    r= EC_POINT_mul(ec_group,px_reenc,&zero,pxy_enc,pri_key,ctx);
-    ec_cmp_flag=EC_POINT_cmp(ec_group,px_reenc,px,ctx);
-    if(ec_cmp_flag==0){
-        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
-    }
+//    //バイナリデータをEC_POINTに変換
+//    EC_POINT *px_binary_ec;
+//    px_binary_ec= binary_to_ec_point(ec_group,px_binary,binary_len,ctx);
+
+//
+//    //逆元の計算
+//    EC_POINT *pxy_enc;
+//    EC_POINT *px_reenc= EC_POINT_new(ec_group);
+//    BIGNUM cl_key_inverse;
+//    int out_no_inverse;
+////    BN_CTX *bnCtx;
+//    BN_MONT_CTX *bnMontCtx;
+//    BN_init(&cl_key_inverse);
+////    bnCtx=BN_CTX_new();
+//    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),ctx);
+//    r= BN_mod_inverse_blinded(&cl_key_inverse,&out_no_inverse,pri_key,bnMontCtx,ctx);
+//    int ec_cmp_flag;
+//    pxy_enc= EC_POINT_new(ec_group);
+//    r= EC_POINT_mul(ec_group, pxy_enc,
+//                    &zero, px, &cl_key_inverse,
+//                    ctx);
+//    //pxy_enc=generator*0+px*cl_key_inverse=px*cl_key_inverse
+//    //px=pxy_enc/cl_key_inverse=pxy_enc*pri_key
+//    r= EC_POINT_mul(ec_group,px_reenc,&zero,pxy_enc,pri_key,ctx);
+//    ec_cmp_flag=EC_POINT_cmp(ec_group,px_reenc,px,ctx);
+//    if(ec_cmp_flag==0){
+//        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
+//    }
 
     return true;
 }

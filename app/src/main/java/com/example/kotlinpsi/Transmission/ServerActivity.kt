@@ -10,11 +10,13 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.kotlinpsi.Database.ContactApplication
 import com.example.kotlinpsi.Database.ContactViewModel
 import com.example.kotlinpsi.R
 import java.net.Inet4Address
 import androidx.lifecycle.observe
+import kotlinx.coroutines.launch
 
 class ServerActivity : AppCompatActivity() {
 
@@ -26,6 +28,8 @@ class ServerActivity : AppCompatActivity() {
 //    lateinit var roomlist:Flow<List<Contact>>
 //
 //    lateinit var roomlist2:List<Contact>
+
+    val enc_mes_list= mutableListOf<List<ByteArray>>()
 
     private val contactViewModel:ContactViewModel by viewModels {
         ContactViewModel.ContactViewmodelFactory((application as ContactApplication).repository)
@@ -78,7 +82,7 @@ class ServerActivity : AppCompatActivity() {
 
         contactViewModel.allLists.observe(owner = this){
             contacts -> contacts.let {
-                Log.d(TAG, "onCreate: ${contacts.toString()}")
+                Log.d(TAG, "onCreate: ${contacts}")
 
                 Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
 
@@ -90,19 +94,51 @@ class ServerActivity : AppCompatActivity() {
                 val f=createKey(pri_key_kt)
                 var i=1 //すべての要素を暗号化できているかのテスト用変数
 
+
+
                 for (message in contacts){
-//                    val n=1 //要素数
-                    Log.d(TAG, "PSI loop step1: No.${i}")
-                    val test:String=message.toString()
-                    Log.d(TAG, "encryptmessage: ${message.toString()}")
-                    val enc_mes:ByteArray=ByteArray(ec_point_length)
-                    val e=encryptSet(test,pri_key_kt, enc_mes)
-                    if(e) {
-                        Log.d(TAG, "onCreate: Back Kotlin finish encrypt message")
+                    var j=1 //テスト用変数
+                    val enc_result= mutableListOf<ByteArray>()
+                    for (name in message.name){
+                        Log.d(TAG, "onCreate: encrypt name : $name")
+                        val enc_mes:ByteArray=ByteArray(ec_point_length)
+                        val e=encryptSet(name,pri_key_kt,enc_mes)
+                        enc_result.add(enc_mes)
+                        if(e){
+                            Log.d(TAG, "onCreate: Back Kotlin finish encrypt name No.$i,$j")
+                        }
+                        j++
                     }
-                    i=i+1
+                    enc_mes_list.add(enc_result)
+                    Log.d(TAG, "onCreate: encrypt message No.$i finish")
+                    i++
                 }
+
+//                for (message in contacts){
+////                    val n=1 //要素数
+//                    Log.d(TAG, "PSI loop step1: No.${i}")
+//                    val test: ByteArray =message.name
+//                    Log.d(TAG, "encryptmessage: ${message.name}")
+//                    val enc_mes:ByteArray=ByteArray(ec_point_length)
+//                    val e=encryptSet(test,pri_key_kt, enc_mes)
+//                    enc_mes_list.add(enc_mes)
+//                    if(e) {
+//                        Log.d(TAG, "onCreate: Back Kotlin finish encrypt message")
+//                    }
+//                    i=i+1
+//                }
                 Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
+
+                Log.d(TAG, "onCreate: send my encrypt data to client")
+                Toast.makeText(this,"通信未実装",Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    Log.d(TAG, "onCreate: Start connect to client")
+                    Control.ServerConnect()
+                    Control.ServerSendMessage(enc_mes_list)
+                    while (true){
+                        Control.ServerReceiveMessage()
+                    }
+                }
             }
         }
 
@@ -112,7 +148,7 @@ class ServerActivity : AppCompatActivity() {
 
     external fun createKey(key :ByteArray): Boolean
 
-    external fun encryptSet(message: String,key: ByteArray,out: ByteArray):Boolean
+    external fun encryptSet(message: Byte, key: ByteArray, out: ByteArray):Boolean
 
 
     external fun aestest():Boolean

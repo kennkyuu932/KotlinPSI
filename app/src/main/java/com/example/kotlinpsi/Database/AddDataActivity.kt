@@ -111,7 +111,7 @@ class AddDataActivity : AppCompatActivity() {
 
         addbutton.setOnClickListener {
             val editdatetext=editdate.text.toString()
-            val editnametext=editname.text.toString()
+            val editnametext=editname.text.toString().toByteArray()
 //            lifecycleScope.launch(Dispatchers.IO) {
 //                try {
 //                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -128,6 +128,7 @@ class AddDataActivity : AppCompatActivity() {
                 val roomdate=LocalDateTime.parse(editdatetext,formatter)
                 contactviewmodel.insert(Contact(date = roomdate, name = editnametext))
                 Log.d(TAG, "onCreate: 要素を追加")
+                Log.d(TAG, "onCreate: name=${editnametext}")
                 Toast.makeText(this,"要素を追加",Toast.LENGTH_SHORT).show()
             }catch (_:Exception){
                 Log.d(TAG, "onCreate: データベースへの入力に失敗")
@@ -137,7 +138,7 @@ class AddDataActivity : AppCompatActivity() {
 
         delbutton.setOnClickListener {
             val editdatetext=editdate.text.toString()
-            val editnametext=editname.text.toString()
+            val editnametext=editname.text.toString().toByteArray()
 //            lifecycleScope.launch(Dispatchers.IO) {
 //                try {
 //                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")

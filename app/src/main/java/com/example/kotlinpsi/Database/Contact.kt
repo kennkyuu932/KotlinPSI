@@ -13,5 +13,5 @@ data class Contact(
 //    //@PrimaryKey @ColumnInfo(name = "time") val time: Time,
 //    @PrimaryKey @ColumnInfo(name = "name") val name: String
     @ColumnInfo(name = "date") val date: LocalDateTime,
-    @ColumnInfo(name = "name") val name: String
+    @ColumnInfo(name = "name") val name: ByteArray
 )

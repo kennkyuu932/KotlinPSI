@@ -38,12 +38,14 @@ object Control {
         Log.d(TAG, "ServerConnect: return")
     }
 
-    suspend fun ServerSendMessage(send_mes:String)= withContext(Dispatchers.IO){
+    suspend fun ServerSendMessage(send_mes:List<List<ByteArray>>)= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerSendMessage: Start")
         try {
             ser_Dos= DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
-            ser_Dos?.writeUTF(send_mes)
-            ser_Dos?.flush()
+            for (message in send_mes){
+//                ser_Dos?.write(message)
+//                ser_Dos?.flush()
+            }
         }catch (_:Exception){}
         Log.d(TAG, "ServerSendMessage: return")
     }
