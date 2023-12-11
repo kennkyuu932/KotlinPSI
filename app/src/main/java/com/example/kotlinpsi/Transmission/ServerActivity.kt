@@ -130,14 +130,13 @@ class ServerActivity : AppCompatActivity() {
                 Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
 
                 Log.d(TAG, "onCreate: send my encrypt data to client")
-                Toast.makeText(this,"通信未実装",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
                 lifecycleScope.launch {
                     Log.d(TAG, "onCreate: Start connect to client")
                     Control.ServerConnect()
-                    Control.ServerSendMessage(enc_mes_list)
-                    while (true){
-                        Control.ServerReceiveMessage()
-                    }
+                    Log.d(TAG, "onCreate: Send encrypt message to Client")
+                    Control.ServerSend(enc_mes_list)
+                    Control.ServerReceive()
                 }
             }
         }

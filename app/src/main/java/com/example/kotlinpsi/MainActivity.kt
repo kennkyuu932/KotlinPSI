@@ -2,14 +2,19 @@ package com.example.kotlinpsi
 
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
+import android.widget.TextView
 import com.example.kotlinpsi.Database.AddDataActivity
 import com.example.kotlinpsi.Transmission.ClientActivity
 import com.example.kotlinpsi.Transmission.ServerActivity
 import com.example.kotlinpsi.databinding.ActivityMainBinding
+import java.net.Inet4Address
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +30,20 @@ class MainActivity : AppCompatActivity() {
         // Example of a call to a native method
         //binding.sampleText.text = stringFromJNI()
         //Log.d(TAG, "Boringtest: "+Boringtest())
+
+        val server_ip_text_main=findViewById<TextView>(R.id.server_ip_main)
+
+        val connectivityManager = getSystemService(ConnectivityManager::class.java)
+
+        val networkCallback = object : ConnectivityManager.NetworkCallback(){
+            override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+                super.onLinkPropertiesChanged(network, linkProperties)
+                server_ip_text_main.text=linkProperties.linkAddresses.filter {
+                    it.address is Inet4Address
+                }[0].toString()
+            }
+        }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
 
         val database = binding.toAdddata
         database.setOnClickListener {
@@ -56,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         clibutton.setOnClickListener {
             Log.d(TAG, "onCreate: push client psi button")
             val intent=Intent(this,ClientActivity::class.java)
-            intent.putExtra(server_ip,ip_text.text)
+            intent.putExtra(server_ip,ip_text.text.toString())
             startActivity(intent)
         }
     }
