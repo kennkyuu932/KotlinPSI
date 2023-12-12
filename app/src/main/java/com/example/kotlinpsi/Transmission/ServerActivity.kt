@@ -23,11 +23,6 @@ class ServerActivity : AppCompatActivity() {
     val pri_key_len=32
     val ec_point_length=65
 
-//    private lateinit var viewmodel:ContactViewModel
-
-//    lateinit var roomlist:Flow<List<Contact>>
-//
-//    lateinit var roomlist2:List<Contact>
 
     val enc_mes_list= mutableListOf<List<ByteArray>>()
 
@@ -53,32 +48,6 @@ class ServerActivity : AppCompatActivity() {
         }
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
 
-//        viewmodel = ViewModelProvider(this).get(ContactViewModel::class.java)
-//        viewmodel.mutabledata.observe(this, Observer { value ->
-//            if(value==0){
-//                Log.d(TAG, "onCreate: value = $value stop PSI")
-//                Toast.makeText(this,"データベースの取得に失敗",Toast.LENGTH_SHORT).show()
-//            }
-//            if(value==4){
-//                Log.d(TAG, "onCreate: value = $value start PSI")
-//
-//
-//            }
-//        })
-
-//        val db=ContactDatabase.getInstance(this)
-//
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            try {
-//                Log.d(TAG, "onCreate: start room")
-////                roomlist=db.contactDao().getAllContacts()
-//                //roomlist2=db.contactDao().getAllList()
-//                viewmodel.changeflag(4)
-//            }catch (_:Exception){
-//                Log.d(TAG, "onCreate: room get data miss")
-//                viewmodel.changeflag(0)
-//            }
-//        }
 
         contactViewModel.allLists.observe(owner = this){
             contacts -> contacts.let {
@@ -114,19 +83,6 @@ class ServerActivity : AppCompatActivity() {
                     i++
                 }
 
-//                for (message in contacts){
-////                    val n=1 //要素数
-//                    Log.d(TAG, "PSI loop step1: No.${i}")
-//                    val test: ByteArray =message.name
-//                    Log.d(TAG, "encryptmessage: ${message.name}")
-//                    val enc_mes:ByteArray=ByteArray(ec_point_length)
-//                    val e=encryptSet(test,pri_key_kt, enc_mes)
-//                    enc_mes_list.add(enc_mes)
-//                    if(e) {
-//                        Log.d(TAG, "onCreate: Back Kotlin finish encrypt message")
-//                    }
-//                    i=i+1
-//                }
                 Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
 
                 Log.d(TAG, "onCreate: send my encrypt data to client")
