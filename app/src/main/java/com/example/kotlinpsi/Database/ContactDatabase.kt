@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Contact::class], version = 10)
+@Database(entities = [Contact::class], version = 21)
 @TypeConverters(ContactConverter::class)
 abstract class ContactDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao
@@ -52,16 +52,5 @@ abstract class ContactDatabase : RoomDatabase() {
             contactDao.deleteContactAll()
         }
 
-//        fun getInstance(context: Context): ContactDatabase {
-//            return INSTANCE ?: synchronized(this){
-//                val instance = Room.databaseBuilder(
-//                    context.applicationContext,
-//                    ContactDatabase::class.java,
-//                    "app_database"
-//                ).fallbackToDestructiveMigration().build()
-//                INSTANCE = instance
-//                instance
-//            }
-//        }
     }
 }

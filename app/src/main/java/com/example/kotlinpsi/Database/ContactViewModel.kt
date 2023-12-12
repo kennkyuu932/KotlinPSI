@@ -1,6 +1,5 @@
 package com.example.kotlinpsi.Database
 
-import android.os.AsyncTask
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,10 +8,20 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class ContactViewModel(private val repository: ContactRepository):ViewModel() {
 
     val allLists:LiveData<List<Contact>> = repository.allLists.asLiveData()
+
+    val _monthLists = MutableLiveData<LiveData<List<Contact>>>()
+    val monthLists : LiveData<LiveData<List<Contact>>> get()=_monthLists
+
+    val _NameLists = MutableLiveData<LiveData<List<Contact>>>()
+    val NameLists : LiveData<LiveData<List<Contact>>> get()=_NameLists
+
+//    val _RangeLists = MutableLiveData<LiveData<List<Contact>>>()
+//    val RangeLists : LiveData<LiveData<List<Contact>>> get()=_RangeLists
 
     fun insert(contact: Contact) = viewModelScope.launch {
         repository.insert(contact)
@@ -26,20 +35,19 @@ class ContactViewModel(private val repository: ContactRepository):ViewModel() {
         repository.deleteAll()
     }
 
+    fun SearchMonth(start:LocalDateTime,stop:LocalDateTime)=viewModelScope.launch {
+        _monthLists.value=repository.SearchMonth(start,stop)
+    }
 
+    fun SearchName(name : ByteArray)=viewModelScope.launch {
+        _NameLists.value=repository.SearchName(name)
+    }
 
-
-
-//    private val _mutabledata=MutableLiveData<Int>()
-//    val mutabledata:LiveData<Int>
-//        get() = _mutabledata
-//
-//    fun changeflag(flag:Int){
-//        AsyncTask.execute {
-//            _mutabledata.postValue(flag)
-//        }
+//    fun SearchRange(first_year : Int, first_month : Int , second_year : Int, second_month : Int)=viewModelScope.launch {
+//        _RangeLists.value=repository.SearchRange(first_year, first_month, second_year, second_month)
 //    }
-//
+
+
     class ContactViewmodelFactory(private val repository: ContactRepository) : ViewModelProvider.Factory{
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if(modelClass.isAssignableFrom(ContactViewModel::class.java)){

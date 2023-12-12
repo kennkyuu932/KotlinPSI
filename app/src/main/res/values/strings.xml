@@ -14,4 +14,10 @@
     <string name="all_delete">All delete</string>
     <string name="delete">delete</string>
     <string name="server_s_ip_adress">Server\'s IP Adress</string>
+    <string name="search">search</string>
+    <string name="allsearch_j">全検索</string>
+    <string name="downarrow">↓</string>
+    <string name="month_j">月</string>
+    <string name="year_j">年</string>
+    <string name="day_j">日</string>
 </resources>
