@@ -17,6 +17,9 @@
         android:theme="@style/Theme.KotlinPSI"
         tools:targetApi="31">
         <activity
+            android:name=".Database.ReadCSVActivity"
+            android:exported="false" />
+        <activity
             android:name=".Database.SearchActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />

@@ -41,20 +41,23 @@ class AddDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_data)
-
-
-
-
+        
         val addbutton=findViewById<Button>(R.id.add_database)
         val delbutton=findViewById<Button>(R.id.delete_one)
         val deleteAllbutton=findViewById<Button>(R.id.delete_all)
         val datepick=findViewById<Button>(R.id.date_pick)
+        val readbutton=findViewById<Button>(R.id.csv_read)
         editdate=findViewById(R.id.editTextdate)
         editname=findViewById(R.id.editTextname)
 
         val searchbutton=findViewById<Button>(R.id.search)
         searchbutton.setOnClickListener {
             val intent: Intent = Intent(this,SearchActivity::class.java)
+            startActivity(intent)
+        }
+
+        readbutton.setOnClickListener {
+            val intent: Intent = Intent(this,ReadCSVActivity::class.java)
             startActivity(intent)
         }
 

@@ -20,4 +20,7 @@
     <string name="month_j">月</string>
     <string name="year_j">年</string>
     <string name="day_j">日</string>
+    <string name="readcsv">readcsv</string>
+    <string name="selectfile">selectfile</string>
+    <string name="change">change</string>
 </resources>
