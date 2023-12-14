@@ -43,9 +43,6 @@ class ContactViewModel(private val repository: ContactRepository):ViewModel() {
         _NameLists.value=repository.SearchName(name)
     }
 
-//    fun SearchRange(first_year : Int, first_month : Int , second_year : Int, second_month : Int)=viewModelScope.launch {
-//        _RangeLists.value=repository.SearchRange(first_year, first_month, second_year, second_month)
-//    }
 
 
     class ContactViewmodelFactory(private val repository: ContactRepository) : ViewModelProvider.Factory{

@@ -29,10 +29,4 @@ interface ContactDao {
     @Query("SELECT * FROM Contact_history_table WHERE name = :name_s ORDER BY date")
     fun SearchName(name_s:ByteArray):LiveData<List<Contact>>
 
-//    @Query("SELECT * FROM Contact_history_table WHERE date BETWEEN :start AND :stop " +
-//            "ORDER BY date")
-//    fun SearchRange(start: LocalDateTime,stop: LocalDateTime):LiveData<List<Contact>>
-
-//    @Query("SELECT * FROM Contact_history_table")
-//    fun getAllList(): List<Contact>
 }

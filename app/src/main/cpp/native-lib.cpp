@@ -362,3 +362,68 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_aestest(JNIEnv *env, jobj
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","aes test %u",aesout);
 
 }
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ClientActivity_encryptClient(JNIEnv *env, jobject thiz,
+                                                                     jbyte message, jbyteArray key,
+                                                                     jbyteArray out) {
+    uint8_t mes = (uint8_t) message;
+    int len=(int) env->GetArrayLength(key);
+    uint8_t pri_key_byte[len];
+    env->GetByteArrayRegion(key,0,len,(jbyte *)pri_key_byte);
+    BIGNUM *pri_key;
+    pri_key = BN_bin2bn(pri_key_byte,len, nullptr);
+    if(pri_key==NULL){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","private key is NULL");
+    }
+    EC_GROUP *ec_group= EC_GROUP_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    EC_POINT *px;
+    BIGNUM x;
+    int i;
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","set message to BIGNUM");
+    BN_init(&x);
+    BN_set_word(&x,(BN_ULONG)mes);
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","crypto message use pri_key_point");
+    r= EC_POINT_mul(ec_group,ps,pri_key,inf,&zero,ctx);
+    uint8_t *px_binary;
+    size_t binary_len;
+    px= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,px,
+                    &zero,ps,&x,
+                    ctx);
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt message ");
+    if(!ec_point_to_binary(ec_group,px,&px_binary,&binary_len,ctx)) {
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","ecpoint to binary false");
+        return false;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt and exchange ecpoint to byte");
+    env->SetByteArrayRegion(out,0,binary_len,(jbyte *)px_binary);
+
+    return true;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ClientActivity_createkeyClient(JNIEnv *env, jobject thiz,
+                                                                       jbyteArray key) {
+    EC_KEY *ec_key = EC_KEY_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_KEY_generate_key(ec_key);
+    //const EC_GROUP *ec_group = EC_KEY_get0_group(ec_key);
+    const BIGNUM *pri_key_bn = EC_KEY_get0_private_key(ec_key);
+    size_t len = BN_num_bytes(pri_key_bn);
+    uint8_t pri_key_byte[len];
+    int bin2bn_flag=BN_bn2bin_padded(pri_key_byte,len,pri_key_bn);
+    if(!bin2bn_flag){
+        return false;
+    }
+    jsize len_j = env->GetArrayLength(key);
+    env->SetByteArrayRegion(key,0,len_j,(jbyte *)pri_key_byte);
+    return true;
+}

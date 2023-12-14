@@ -10,6 +10,7 @@
         android:id="@+id/server_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:ems="10"
         android:hint="@string/server_message"
         android:inputType="text"
@@ -19,14 +20,14 @@
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.803"
-        android:autofillHints="" />
+        app:layout_constraintVertical_bias="0.837" />
 
     <EditText
         android:id="@+id/client_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="360dp"
+        android:layout_marginBottom="444dp"
+        android:autofillHints=""
         android:ems="10"
         android:hint="@string/client_message"
         android:inputType="text"
@@ -34,8 +35,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/server_message"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/server_message"
-        android:autofillHints="" />
+        app:layout_constraintStart_toStartOf="@+id/server_message" />
 
     <Button
         android:id="@+id/psi_start"
@@ -44,10 +44,10 @@
         android:text="@string/start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.749"
+        app:layout_constraintHorizontal_bias="0.789"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/client_message"
-        app:layout_constraintVertical_bias="0.102" />
+        app:layout_constraintVertical_bias="0.098" />
 
     <Button
         android:id="@+id/server_psi"
@@ -56,10 +56,10 @@
         android:text="@string/server"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.831"
+        app:layout_constraintHorizontal_bias="0.84"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/psi_start"
-        app:layout_constraintVertical_bias="0.418" />
+        app:layout_constraintVertical_bias="0.612" />
 
     <Button
         android:id="@+id/client_psi"
@@ -68,10 +68,10 @@
         android:text="@string/client"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/server_psi"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/server_psi"
         app:layout_constraintTop_toBottomOf="@+id/server_psi"
-        app:layout_constraintVertical_bias="0.267" />
+        app:layout_constraintVertical_bias="0.344" />
 
     <Button
         android:id="@+id/to_adddata"
@@ -80,10 +80,10 @@
         android:text="@string/add_data"
         app:layout_constraintBottom_toTopOf="@+id/server_message"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.132"
+        app:layout_constraintHorizontal_bias="0.137"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.497" />
+        app:layout_constraintVertical_bias="0.746" />
 
     <EditText
         android:id="@+id/edit_ip"
@@ -96,10 +96,10 @@
         android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="@+id/client_psi"
         app:layout_constraintEnd_toStartOf="@+id/client_psi"
-        app:layout_constraintHorizontal_bias="0.714"
+        app:layout_constraintHorizontal_bias="0.719"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/client_psi"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/server_ip_main"
@@ -110,5 +110,36 @@
         app:layout_constraintEnd_toStartOf="@+id/server_psi"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/server_psi" />
+
+    <RadioGroup
+        android:layout_width="367dp"
+        android:layout_height="149dp"
+        app:layout_constraintBottom_toTopOf="@+id/server_psi"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/psi_start"
+        tools:ignore="TextSizeCheck">
+
+        <RadioButton
+            android:id="@+id/radio_monthlater"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="過去1か月のデータを用いる"
+            tools:ignore="VisualLintButtonSize" />
+
+        <RadioButton
+            android:id="@+id/radio_3monthlater"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="過去3ヶ月分のデータを用いる"
+            tools:ignore="VisualLintButtonSize" />
+
+        <RadioButton
+            android:id="@+id/radio_all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="すべてのデータを用いる"
+            tools:ignore="VisualLintButtonSize" />
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

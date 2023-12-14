@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
+import android.widget.RadioButton
 import android.widget.TextView
 import com.example.kotlinpsi.Database.AddDataActivity
 import com.example.kotlinpsi.Transmission.ClientActivity
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         //Log.d(TAG, "Boringtest: "+Boringtest())
 
         val server_ip_text_main=findViewById<TextView>(R.id.server_ip_main)
+        var radio=0
 
         val connectivityManager = getSystemService(ConnectivityManager::class.java)
 
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         serbutton.setOnClickListener {
             Log.d(TAG, "onCreate: push server psi button")
             val intent=Intent(this,ServerActivity::class.java)
+            intent.putExtra(radioflag,radio)
             startActivity(intent)
         }
         val clibutton=binding.clientPsi
@@ -76,8 +79,27 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "onCreate: push client psi button")
             val intent=Intent(this,ClientActivity::class.java)
             intent.putExtra(server_ip,ip_text.text.toString())
+            intent.putExtra(radioflag,radio)
             startActivity(intent)
         }
+
+
+        val radio1month=binding.radioMonthlater
+        radio1month.setOnClickListener {
+            Log.d(TAG, "onCreate: radio 1")
+            radio=1
+        }
+        val radio3month=binding.radio3monthlater
+        radio3month.setOnClickListener {
+            Log.d(TAG, "onCreate: radio 3")
+            radio=3
+        }
+        val radioall=binding.radioAll
+        radioall.setOnClickListener {
+            Log.d(TAG, "onCreate: radio 0")
+            radio=0
+        }
+
     }
 
     /**
@@ -103,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         val psi_intent_message = "PSIRESULT"
 
         val server_ip = "SERVERIP"
+        val radioflag = "RADIOBUTTON"
 
 
         public lateinit var test:String

@@ -38,10 +38,5 @@ class ContactRepository(private val contactDao: ContactDao) {
         return contactDao.SearchName(name)
     }
 
-//    @Suppress("RedundantSuspendModifier")
-//    @WorkerThread
-//    suspend fun SearchRange(first_year:Int, first_month: Int ,second_year:Int, second_month:Int): LiveData<List<Contact>>{
-//        return contactDao.SearchRange(first_year,first_month,second_year,second_month)
-//    }
 
 }
