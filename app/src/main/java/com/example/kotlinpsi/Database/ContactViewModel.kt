@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -14,14 +16,6 @@ class ContactViewModel(private val repository: ContactRepository):ViewModel() {
 
     val allLists:LiveData<List<Contact>> = repository.allLists.asLiveData()
 
-    val _monthLists = MutableLiveData<LiveData<List<Contact>>>()
-    val monthLists : LiveData<LiveData<List<Contact>>> get()=_monthLists
-
-    val _NameLists = MutableLiveData<LiveData<List<Contact>>>()
-    val NameLists : LiveData<LiveData<List<Contact>>> get()=_NameLists
-
-//    val _RangeLists = MutableLiveData<LiveData<List<Contact>>>()
-//    val RangeLists : LiveData<LiveData<List<Contact>>> get()=_RangeLists
 
     fun insert(contact: Contact) = viewModelScope.launch {
         repository.insert(contact)
@@ -35,14 +29,13 @@ class ContactViewModel(private val repository: ContactRepository):ViewModel() {
         repository.deleteAll()
     }
 
-    fun SearchMonth(start:LocalDateTime,stop:LocalDateTime)=viewModelScope.launch {
-        _monthLists.value=repository.SearchMonth(start,stop)
-    }
 
-    fun SearchName(name : ByteArray)=viewModelScope.launch {
-        _NameLists.value=repository.SearchName(name)
-    }
 
+    //
+    fun SearchMonth(start: LocalDateTime,stop: LocalDateTime):Flow<List<Contact>> = repository.SearchMonth(start,stop)
+
+    fun SearchName(name:ByteArray):Flow<List<Contact>> = repository.SearchName(name)
+    //
 
 
     class ContactViewmodelFactory(private val repository: ContactRepository) : ViewModelProvider.Factory{

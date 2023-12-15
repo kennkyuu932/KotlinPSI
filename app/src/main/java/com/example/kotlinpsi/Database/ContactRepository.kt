@@ -26,15 +26,12 @@ class ContactRepository(private val contactDao: ContactDao) {
         contactDao.deleteContactAll()
     }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun SearchMonth(start:LocalDateTime,stop:LocalDateTime): LiveData<List<Contact>> {
-        return contactDao.SerachMonth(start,stop)
+
+    fun SearchMonth(start: LocalDateTime,stop: LocalDateTime):Flow<List<Contact>>{
+        return contactDao.SearchMonth(start,stop)
     }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun SearchName(name:ByteArray): LiveData<List<Contact>> {
+    fun SearchName(name:ByteArray):Flow<List<Contact>>{
         return contactDao.SearchName(name)
     }
 

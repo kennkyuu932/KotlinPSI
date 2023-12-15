@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -47,7 +48,7 @@ class SearchActivity : AppCompatActivity() {
 
         allbutton.setOnClickListener {
             Log.d(TAG, "onCreate: Search All")
-            contactViewModel.allLists.observe(owner = this){
+            contactViewModel.allLists.observe(this){
                 contacts -> contacts.let {
                     Log.d(TAG, "onCreate: $contacts")
                     adapter.submitList(it)
@@ -69,17 +70,10 @@ class SearchActivity : AppCompatActivity() {
                     }else{
                         stop=LocalDateTime.of(year,month+1,1,0,0)
                     }
-                    contactViewModel.SearchMonth(start,stop)
-                    contactViewModel.monthLists.observe(owner = this){
-                            contacts -> contacts.let {
-                                contacts.observe(owner = this){
-                                    contactlist->contactlist.let {
-                                        adapter.submitList(contactlist)
-                                        Log.d(TAG, "onCreate: $contactlist")
-                                    }
-                                }
-                            }
-                        Log.d(TAG, "onCreate: observe")
+                    contactViewModel.SearchMonth(start,stop).asLiveData().observe(this){
+                        contacts -> contacts.let {
+                            adapter.submitList(it)
+                        }
                     }
                 }else{
                     Toast.makeText(this,"正しい月を入力してください",Toast.LENGTH_SHORT).show()
@@ -92,17 +86,10 @@ class SearchActivity : AppCompatActivity() {
             Log.d(TAG, "onCreate: Search name")
             val search=editname.text.toString().toByteArray()
             try {
-                contactViewModel.SearchName(search)
-                contactViewModel.NameLists.observe(owner = this){
-                        contacts ->contacts.let {
-                            contacts.observe(owner = this){
-                                contactlist -> contactlist.let {
-                                    adapter.submitList(contactlist)
-                                    Log.d(TAG, "onCreate: $contactlist")
-                                }
-                            }
-                        }
-                    Log.d(TAG, "onCreate: observe")
+                contactViewModel.SearchName(search).asLiveData().observe(this){
+                    contacts -> contacts.let {
+                        adapter.submitList(it)
+                    }
                 }
             }catch (_:Exception){
                 Toast.makeText(this,"不正な検索の値です",Toast.LENGTH_SHORT).show()
@@ -126,17 +113,10 @@ class SearchActivity : AppCompatActivity() {
                 }else{
                     val start=LocalDateTime.of(first_year,first_month,first_day,0,0)
                     val stop=LocalDateTime.of(second_year,second_month,second_day,0,0)
-                    contactViewModel.SearchMonth(start,stop)
-                    contactViewModel.monthLists.observe(owner = this){
-                            contacts -> contacts.let {
-                                contacts.observe(owner = this){
-                                    contactlist->contactlist.let {
-                                        adapter.submitList(contactlist)
-                                        Log.d(TAG, "onCreate: $contactlist")
-                                    }
-                                }
-                            }
-                        Log.d(TAG, "onCreate: observe")
+                    contactViewModel.SearchMonth(start,stop).asLiveData().observe(this){
+                        contacts -> contacts.let {
+                            adapter.submitList(it)
+                        }
                     }
                 }
             }catch (_:Exception){

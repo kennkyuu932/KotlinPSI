@@ -8,6 +8,17 @@ AndroidでBoringSSLを用いてPSIを行うアプリ
 
 ・ダミーの接触履歴の共通要素を求める．
 
+2023/12/15
+
+Roomの検索の際にFlow<List<Contact>>型を使えないと思っていたため，
+MutableLiveData<LiveData<List<Contact>>>というような構造のデータを使っていたが，
+そのせいで12/14にあったような状況になってしまっていたが，Flow<List<Contact>>を使えるように改善した．
+
+参考にしたプロジェクトのgithub
+(https://github.com/google-developer-training/android-basics-kotlin-bus-schedule-app/tree/main)
+
+app/src/main/java/com/example/busschedule/viewmodels/ScheduleListViewModel.kt
+
 2023/12/14
 
 PSIを実行するときに範囲を指定できるようにしている途中

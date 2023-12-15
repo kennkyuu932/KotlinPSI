@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Contact::class], version = 21)
+@Database(entities = [Contact::class], version = 25)
 @TypeConverters(ContactConverter::class)
 abstract class ContactDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao

@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import com.example.kotlinpsi.Database.ContactApplication
 import com.example.kotlinpsi.Database.ContactViewModel
@@ -59,7 +60,7 @@ class ServerActivity : AppCompatActivity() {
         when (radioflag) {
             0 -> {
                 Log.d(TAG, "onCreate: 全部のデータでPSI")
-                contactViewModel.allLists.observe(owner = this) { contacts ->
+                contactViewModel.allLists.observe(this) { contacts ->
                     Toast.makeText(this, "PSI開始", Toast.LENGTH_SHORT).show()
 
                     Log.d(TAG, "onCreate: PSIStart ")
@@ -80,18 +81,12 @@ class ServerActivity : AppCompatActivity() {
                 }else{
                     start=LocalDateTime.of(now.year,now.monthValue-1,now.dayOfMonth,now.hour,now.minute)
                 }
-                contactViewModel.SearchMonth(start,now)
-                contactViewModel.monthLists.observe(owner = this){
+                contactViewModel.SearchMonth(start,now).asLiveData().observe(owner = this){
                     contacts -> contacts.let {
-                        contacts.observe(this){
-                            contactlists ->
-                                Log.d(TAG, "onCreate: PSIStart")
-                                Log.d(TAG, "onCreate: PSI step1")
-                                contactlists.let {
-                                    PSIencrypt(contactlists,pri_key_kt)
-                                    PSISend(enc_mes_list)
-                                }
-                        }
+                        Log.d(TAG, "onCreate: PSIStart")
+                        Log.d(TAG, "onCreate: ${contacts.size}")
+                        PSIencrypt(contacts, pri_key_kt)
+                        PSISend(enc_mes_list)
                     }
                 }
             }
@@ -108,19 +103,13 @@ class ServerActivity : AppCompatActivity() {
                 }else{
                     start=LocalDateTime.of(now.year,now.monthValue-3,now.dayOfMonth,now.hour,now.minute)
                 }
-                contactViewModel.SearchMonth(start,now)
-                contactViewModel.monthLists.observe(owner = this){
+                contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                         contacts -> contacts.let {
-                        contacts.observe(this){
-                            contactlists ->
-                                Log.d(TAG, "onCreate: PSIStart")
-                                Log.d(TAG, "onCreate: PSI step1")
-                                contactlists.let {
-                                    PSIencrypt(contactlists,pri_key_kt)
-                                    PSISend(enc_mes_list)
-                                }
+                            Log.d(TAG, "onCreate: PSIStart")
+                            Log.d(TAG, "onCreate: ${contacts.size}")
+                            PSIencrypt(contacts, pri_key_kt)
+                            PSISend(enc_mes_list)
                         }
-                    }
                 }
             }
         }
