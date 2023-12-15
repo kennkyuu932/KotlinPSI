@@ -15,8 +15,7 @@ MutableLiveData<LiveData<List<Contact>>>というような構造のデータを�
 そのせいで12/14にあったような状況になってしまっていたが，Flow<List<Contact>>を使えるように改善した．
 
 参考にしたプロジェクトの
-[github]
-(https://github.com/google-developer-training/android-basics-kotlin-bus-schedule-app/tree/main)
+[github](https://github.com/google-developer-training/android-basics-kotlin-bus-schedule-app/tree/main)
 
 app/src/main/java/com/example/busschedule/viewmodels/ScheduleListViewModel.kt
 
