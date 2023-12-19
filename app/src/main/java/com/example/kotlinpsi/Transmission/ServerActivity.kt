@@ -28,6 +28,7 @@ class ServerActivity : AppCompatActivity() {
     val ec_point_length=65
 
 
+
     val enc_mes_list= mutableListOf<List<ByteArray>>()
 
     private val contactViewModel:ContactViewModel by viewModels {
@@ -57,6 +58,9 @@ class ServerActivity : AppCompatActivity() {
         val pri_key_kt:ByteArray = ByteArray(pri_key_len)
         val f=createKey(pri_key_kt)
 
+        //クライアントから受け取った暗号データ
+        val ser_res_list_first= mutableListOf<List<ByteArray>>()
+
         when (radioflag) {
             0 -> {
                 Log.d(TAG, "onCreate: 全部のデータでPSI")
@@ -68,7 +72,7 @@ class ServerActivity : AppCompatActivity() {
                     Log.d(TAG, "onCreate: PSI step1")
                     contacts.let {
                         PSIencrypt(contacts, pri_key_kt)
-                        PSISend(enc_mes_list)
+                        PSISend_first(enc_mes_list)
                     }
                 }
             }
@@ -86,7 +90,7 @@ class ServerActivity : AppCompatActivity() {
                         Log.d(TAG, "onCreate: PSIStart")
                         Log.d(TAG, "onCreate: ${contacts.size}")
                         PSIencrypt(contacts, pri_key_kt)
-                        PSISend(enc_mes_list)
+                        PSISend_first(enc_mes_list)
                     }
                 }
             }
@@ -108,12 +112,47 @@ class ServerActivity : AppCompatActivity() {
                             Log.d(TAG, "onCreate: PSIStart")
                             Log.d(TAG, "onCreate: ${contacts.size}")
                             PSIencrypt(contacts, pri_key_kt)
-                            PSISend(enc_mes_list)
+                            PSISend_first(enc_mes_list)
                         }
                 }
             }
         }
 
+//
+//        //受け取り(step2)
+//        lifecycleScope.launch {
+//            var i_ser=0
+//            Control.ServerReceiveSize()
+//            val firstlistsize=Control.ser_res_size
+//            Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//            Log.d(TAG, "onCreate: Outside loop Server ${firstlistsize}")
+//            while (i_ser<firstlistsize!!){
+//                Control.ser_res_size=null
+//                Control.ServerReceiveSize()
+//                val ser_res_encrypt_second = mutableListOf<ByteArray>()
+//                var j_ser=0
+//                val secondlistsize = Control.ser_res_size
+//                Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//                while (j_ser<secondlistsize!!){
+//                    Control.ser_res_size=null
+//                    Control.ServerReceiveSize()
+//                    val thirdlistsize=Control.ser_res_size
+//                    Log.d(TAG, "onCreate: thirdlistsize $thirdlistsize")
+//                    Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//                    if (thirdlistsize!=null){
+//                        Control.ServerReceive(thirdlistsize)
+//                    }
+//                    j_ser++
+//                    Control.ser_res_mes.let { ser_res_encrypt_second.add(it) }
+//                    val res_size=Control.ser_res_mes.size
+//                    Control.ServerSendNotice(res_size)
+//                }
+//                i_ser++
+//                ser_res_list_first.add(ser_res_encrypt_second)
+//            }
+//        }
+
+        Log.d(TAG, "onCreate: Server おしまい")
 
     }
 
@@ -143,7 +182,7 @@ class ServerActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
     }
 
-    fun PSISend(encmes:List<List<ByteArray>>){
+    fun PSISend_first(encmes:List<List<ByteArray>>){
         Log.d(TAG, "onCreate: send my encrypt data to client")
         Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
@@ -151,8 +190,8 @@ class ServerActivity : AppCompatActivity() {
             Control.ServerConnect()
             Log.d(TAG, "onCreate: Send encrypt message to Client")
             Control.ServerSend(enc_mes_list)
-            Log.d(TAG, "onCreate: Start Receive client encrypt message")
-            Control.ServerReceive()
+//            Log.d(TAG, "onCreate: Start Receive client encrypt message")
+//            Control.ServerReceive()
         }
     }
 
