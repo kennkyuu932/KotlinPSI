@@ -12,4 +12,7 @@ class ClientViewModel():ViewModel() {
     val receiveflag: MutableLiveData<Int> by lazy {
         MutableLiveData<Int>()
     }
+//    val client_end_flag : MutableLiveData<Int> by lazy {
+//        MutableLiveData<Int>()
+//    }
 }

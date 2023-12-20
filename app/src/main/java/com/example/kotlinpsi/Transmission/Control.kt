@@ -10,11 +10,14 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.ServerSocket
 import java.net.Socket
+import androidx.activity.viewModels
 
 object Control {
 
     var ser_res_size:Int?=null
     var cli_res_size:Int?=null
+    var ser_end_flag:Int?=null
+    var cli_end_flag:Int?=null
     lateinit var ser_res_mes:ByteArray
     lateinit var cli_res_mes:ByteArray
     private var ser_serversoc: ServerSocket?=null
@@ -24,8 +27,18 @@ object Control {
     private var cli_socket: Socket?=null
     private var cli_Dis: DataInputStream?=null
     private var cli_Dos: DataOutputStream?=null
+//
+//    private val START1 : String = "start step1"
+//    private val FINISH1 : String = "finish step1"
+//    private val START2 : String = "start step2"
+//    private val FINISH2 : String = "finish step2"
+//    private val START3 : String = "start step3"
+//    private val FINISH3 : String = "finish step3"
+//    private val START4 : String = "start step4"
+//    private val FINISH4 : String = "finish step4"
 
     const val PORT: Int = 50000
+
 
     suspend fun ServerConnect()= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerConnect: Start")
@@ -90,6 +103,7 @@ object Control {
                         }
                     }
                 }
+                ServerReceiveEnd()
             }
         }catch (_:Exception){}
         Log.d(TAG, "ServerSend: return")
@@ -106,11 +120,25 @@ object Control {
         Log.d(TAG, "ServerNotice: return")
     }
 
+    suspend fun ServerReceiveEnd()= withContext(Dispatchers.IO){
+        Log.d(TAG, "ServerReceiveEnd: Start")
+        try {
+            Log.d(TAG, "ServerReceiveEnd: try")
+            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            ser_end_flag= ser_Dis?.readInt()
+            Log.d(TAG, "ServerReceiveEnd: receive $ser_end_flag")
+        }catch (_:Exception){}
+        Log.d(TAG, "ServerReceiveEnd: return")
+    }
+
     suspend fun ServerReceiveSize()= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerReceive: Start")
         try {
             Log.d(TAG, "ServerReceiveSize: try")
             ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            if(ser_Dis==null){
+                Log.d(TAG, "ServerReceiveSize: ser_dis null")
+            }
             ser_res_size= ser_Dis?.readInt()
             Log.d(TAG, "ServerReceiveSize: $ser_res_size")
         }catch (_:Exception){}
@@ -177,9 +205,21 @@ object Control {
                         }
                     }
                 }
+                ClientReceiveEnd()
             }
         }catch (_:Exception){}
         Log.d(TAG, "ClientSend: return")
+    }
+
+    suspend fun ClientReceiveEnd()= withContext(Dispatchers.IO){
+        Log.d(TAG, "ClientReceiveEnd: Start")
+        try {
+            Log.d(TAG, "ClientReceiveEnd: try")
+            cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            cli_end_flag= cli_Dis?.readInt()
+            Log.d(TAG, "ClientReceiveEnd: $cli_end_flag")
+        }catch (_:Exception){}
+        Log.d(TAG, "ClientReceiveEnd: return")
     }
 
     suspend fun ClientReceiveNotice()= withContext(Dispatchers.IO){
@@ -230,6 +270,15 @@ object Control {
         }catch (_:Exception){}
         Log.d(TAG, "ClientReceive: return")
     }
+//
+//    suspend fun ClientSendEnd()= withContext(Dispatchers.IO){
+//        Log.d(TAG, "ClientSendEnd: Start")
+//        try {
+//            Log.d(TAG, "ClientSendEnd: try")
+//            cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
+//        }catch (_:Exception){}
+//        Log.d(TAG, "ClientSendEnd: return")
+//    }
 
 
     //

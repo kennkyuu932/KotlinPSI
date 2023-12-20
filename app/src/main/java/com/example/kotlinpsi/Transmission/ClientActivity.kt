@@ -45,111 +45,123 @@ class ClientActivity : AppCompatActivity() {
         val cli_res_encrypt_first= mutableListOf<List<ByteArray>>()
         var resflag=0
 
-        val mflagObserver = Observer<Int>{ flag ->
+        val clientObserver = Observer<Int>{ flag ->
             //受け取り終えたら行う行程
             //自分が暗号化した履歴をサーバーが暗号化して送ってくるためそれを受け取り，共通部分を計算して送る
-            if(flag==1){
-                Log.d(TAG, "onCreate: Observer Start")
+            when(flag){
+                1 ->{
+                    Log.d(TAG, "onCreate: step2 Start")
+                    Toast.makeText(this,"start step2",Toast.LENGTH_SHORT).show()
+                    //
+                    when(radioflag){
+                        0 ->{
+                            contactViewModel.allLists.observe(this){
+                                    contacts -> contacts.let {
+                                        Log.d(TAG, "onCreate: ${contacts.toString()}")
+                                        //Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
+                                        Log.d(TAG, "onCreate: PSIStart")
+                                        Log.d(TAG, "onCreate: PSI step2")
 
-                //
-                when(radioflag){
-                    0 ->{
-                        contactViewModel.allLists.observe(this){
-                                contacts -> contacts.let {
-                            Log.d(TAG, "onCreate: ${contacts.toString()}")
-                            Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
-                            Log.d(TAG, "onCreate: PSIStart")
-                            Log.d(TAG, "onCreate: PSI step2")
+                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
+                                        val f=createkeyClient(pri_key_kt)
+                                        var i=1 //テスト用変数
+                                        PSIencryptClient(contacts,pri_key_kt)
+                                        PSISendClient(enc_mes_list,flagmodel)
+                                    }
+                            }
+                        }
+                        1 ->{
+                            val now = LocalDateTime.now()
+                            val start: LocalDateTime
+                            if(now.monthValue==1){
+                                start= LocalDateTime.of(now.year-1,12,now.dayOfMonth,now.hour,now.minute)
+                            }else{
+                                start= LocalDateTime.of(now.year,now.monthValue-1,now.dayOfMonth,now.hour,now.minute)
+                            }
+                            contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
+                                    contacts -> contacts.let {
+                                        Log.d(TAG, "onCreate: ${contacts.toString()}")
+                                        //Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
+                                        Log.d(TAG, "onCreate: PSIStart")
+                                        Log.d(TAG, "onCreate: PSI step2")
 
-                            val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                            val f=createkeyClient(pri_key_kt)
-                            var i=1 //テスト用変数
-                            PSIencryptClient(contacts,pri_key_kt)
-                            PSISendClient(enc_mes_list)
+                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
+                                        val f=createkeyClient(pri_key_kt)
+                                        var i=1 //テスト用変数
+                                        PSIencryptClient(contacts,pri_key_kt)
+                                        PSISendClient(enc_mes_list,flagmodel)
+                                    }
+                            }
                         }
-                        }
-                    }
-                    1 ->{
-                        val now = LocalDateTime.now()
-                        val start: LocalDateTime
-                        if(now.monthValue==1){
-                            start= LocalDateTime.of(now.year-1,12,now.dayOfMonth,now.hour,now.minute)
-                        }else{
-                            start= LocalDateTime.of(now.year,now.monthValue-1,now.dayOfMonth,now.hour,now.minute)
-                        }
-                        contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
-                                contacts -> contacts.let {
-                            Log.d(TAG, "onCreate: ${contacts.toString()}")
-                            Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
-                            Log.d(TAG, "onCreate: PSIStart")
-                            Log.d(TAG, "onCreate: PSI step2")
+                        3->{
+                            val now = LocalDateTime.now()
+                            val start: LocalDateTime
+                            if(now.monthValue==3){
+                                start= LocalDateTime.of(now.year-1,12,now.dayOfMonth,now.hour,now.minute)
+                            }else if(now.monthValue==2){
+                                start= LocalDateTime.of(now.year-1,11,now.dayOfMonth,now.hour,now.minute)
+                            } else if(now.monthValue==1){
+                                start= LocalDateTime.of(now.year-1,10,now.dayOfMonth,now.hour,now.minute)
+                            }else{
+                                start=LocalDateTime.of(now.year,now.monthValue-3,now.dayOfMonth,now.hour,now.minute)
+                            }
+                            contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
+                                    contacts -> contacts.let {
+                                        Log.d(TAG, "onCreate: ${contacts.toString()}")
+                                        //Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
+                                        Log.d(TAG, "onCreate: PSIStart")
+                                        Log.d(TAG, "onCreate: PSI step2")
 
-                            val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                            val f=createkeyClient(pri_key_kt)
-                            var i=1 //テスト用変数
-                            PSIencryptClient(contacts,pri_key_kt)
-                            PSISendClient(enc_mes_list)
-                        }
-                        }
-                    }
-                    3->{
-                        val now = LocalDateTime.now()
-                        val start: LocalDateTime
-                        if(now.monthValue==3){
-                            start= LocalDateTime.of(now.year-1,12,now.dayOfMonth,now.hour,now.minute)
-                        }else if(now.monthValue==2){
-                            start= LocalDateTime.of(now.year-1,11,now.dayOfMonth,now.hour,now.minute)
-                        } else if(now.monthValue==1){
-                            start= LocalDateTime.of(now.year-1,10,now.dayOfMonth,now.hour,now.minute)
-                        }else{
-                            start=LocalDateTime.of(now.year,now.monthValue-3,now.dayOfMonth,now.hour,now.minute)
-                        }
-                        contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
-                                contacts -> contacts.let {
-                            Log.d(TAG, "onCreate: ${contacts.toString()}")
-                            Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
-                            Log.d(TAG, "onCreate: PSIStart")
-                            Log.d(TAG, "onCreate: PSI step2")
-
-                            val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                            val f=createkeyClient(pri_key_kt)
-                            var i=1 //テスト用変数
-                            PSIencryptClient(contacts,pri_key_kt)
-                            PSISendClient(enc_mes_list)
-                        }
+                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
+                                        val f=createkeyClient(pri_key_kt)
+                                        var i=1 //テスト用変数
+                                        PSIencryptClient(contacts,pri_key_kt)
+                                        PSISendClient(enc_mes_list,flagmodel)
+                                    }
+                            }
                         }
                     }
                 }
+                2->{
+                    //step3 サーバが暗号化したクライアントの集合を受け取る
+                    Log.d(TAG, "onCreate: start step3")
+                    Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
+                }
+                3->{
+                    Log.d(TAG, "onCreate: start step4")
+                    Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
+                }
+
 
                 //
             }
         }
 
-        flagmodel.receiveflag.observe(this,mflagObserver)
-
-
+        flagmodel.receiveflag.observe(this,clientObserver)
 
 
 
 
 
         lifecycleScope.launch {
+            //step1受け取り
             if (ipaddr!=null){
                 Control.ClientConnect(ipaddr)
-                var i_cli=0
+                var i=0
                 Control.ClientReceiveSize()
                 val firstlistsize=Control.cli_res_size
                 Control.cli_res_size?.let { Control.ClientSendNotice(it) }
                 Log.d(TAG, "onCreate: Outside loop $firstlistsize")
-                while(i_cli<firstlistsize!!){
+                while(i<firstlistsize!!){
                     //フラグを初期化
                     Control.cli_res_size=null
                     Control.ClientReceiveSize()
                     val cli_res_encrypt_second= mutableListOf<ByteArray>()
-                    var j_cli=0
+                    var j=0
                     val secondlistsize=Control.cli_res_size
                     Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                    while (j_cli<secondlistsize!!){
+                    while (j<secondlistsize!!){
                         //フラグの初期化
                         Control.cli_res_size=null
                         Control.ClientReceiveSize()
@@ -159,15 +171,16 @@ class ClientActivity : AppCompatActivity() {
                         if (thirdlistsize!=null){
                             Control.ClientReceive(thirdlistsize)
                         }
-                        j_cli++
+                        j++
                         Control.cli_res_mes.let { cli_res_encrypt_second.add(it) }
                         val res_size=Control.cli_res_mes.size
                         Control.ClientSendNotice(res_size)
                     }
-                    i_cli++
+                    i++
                     cli_res_encrypt_first.add(cli_res_encrypt_second)
                 }
                 resflag=1
+                Control.ClientSendNotice(1)
                 flagmodel.receiveflag.value=1
             }
         }
@@ -192,12 +205,14 @@ class ClientActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
     }
 
-    fun PSISendClient(encmes:List<List<ByteArray>>){
+    fun PSISendClient(encmes:List<List<ByteArray>>,viewmodel: ClientViewModel){
         Log.d(TAG, "PSISendClient: send my encrypt data to server")
-        Toast.makeText(this,"通信開始(Client to Server)",Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this,"通信開始(Client to Server)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             Log.d(TAG, "PSISendClient: Start connect to server")
             Control.ClientSend(enc_mes_list)
+            viewmodel.receiveflag.value=Control.cli_end_flag
+            Log.d(TAG, "PSISendClient: return")
         }
     }
 
