@@ -427,3 +427,96 @@ Java_com_example_kotlinpsi_Transmission_ClientActivity_createkeyClient(JNIEnv *e
     env->SetByteArrayRegion(key,0,len_j,(jbyte *)pri_key_byte);
     return true;
 }
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptdouble(JNIEnv *env, jobject thiz,
+                                                                     jbyteArray enc_message,
+                                                                     jbyteArray key,
+                                                                     jbyteArray out) {
+    int key_len=(int) env->GetArrayLength(key);
+    uint8_t pri_key_byte[key_len];
+    env->GetByteArrayRegion(key,0,key_len,(jbyte *)pri_key_byte);
+    int mes_len=(int) env->GetArrayLength(enc_message);
+    uint8_t enc_mes_byte[mes_len];
+    env->GetByteArrayRegion(enc_message,0,mes_len,(jbyte *)enc_mes_byte);
+    BIGNUM *pri_key;
+    pri_key= BN_bin2bn(pri_key_byte,key_len, nullptr);
+    EC_GROUP *ec_group= EC_GROUP_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    EC_POINT *px;
+    //メッセージをEC_POINTに変換
+    EC_POINT *px_binary_ec;
+    px_binary_ec= binary_to_ec_point(ec_group,enc_mes_byte,mes_len,ctx);
+    px= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,px,&zero,px_binary_ec,pri_key,ctx);
+    //バイナリデータに変換
+    uint8_t *out_binary_set;
+    size_t out_len;
+    if (!ec_point_to_binary(ec_group,px,&out_binary_set,&out_len,ctx)){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt to binary false (double encrypt)");
+        return false;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt to binary true (double encrypt)");
+    env->SetByteArrayRegion(out,0,out_len,(jbyte *)out_binary_set);
+
+    return true;
+}
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ClientActivity_decryptcalc(JNIEnv *env, jobject thiz,
+                                                                   jbyteArray double_mes,
+                                                                   jbyteArray ser_mes,
+                                                                   jbyteArray key) {
+    //データ変換
+    int key_len=(int) env->GetArrayLength(key);
+    uint8_t pri_key_byte[key_len];
+    env->GetByteArrayRegion(key,0,key_len,(jbyte *)pri_key_byte);
+    BIGNUM *pri_key;
+    pri_key= BN_bin2bn(pri_key_byte,key_len, nullptr);
+    int dou_mes_len = (int) env->GetArrayLength(double_mes);
+    uint8_t dou_mes_byte[dou_mes_len];
+    env->GetByteArrayRegion(double_mes,0,dou_mes_len,(jbyte *)dou_mes_byte);
+    int ser_mes_len = (int) env->GetArrayLength(ser_mes);
+    uint8_t ser_mes_byte[ser_mes_len];
+    env->GetByteArrayRegion(ser_mes,0,ser_mes_len,(jbyte *)ser_mes_byte);
+    //データをEC_POINTに変換
+    EC_GROUP *ec_group= EC_GROUP_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    EC_POINT *double_enc_mes;
+    double_enc_mes= binary_to_ec_point(ec_group,dou_mes_byte,dou_mes_len,ctx);
+    EC_POINT *server_enc_mes;
+    server_enc_mes = binary_to_ec_point(ec_group,ser_mes_byte,ser_mes_len,ctx);
+    //double_enc_mesに対して逆元計算
+    EC_POINT *decrypt_mes;
+    BIGNUM key_inverse;
+    int out_no_inverse;
+    BN_MONT_CTX *bnMontCtx;
+    BN_init(&key_inverse);
+    bnMontCtx= BN_MONT_CTX_new_for_modulus(EC_GROUP_get0_order(ec_group),ctx);
+    r= BN_mod_inverse_blinded(&key_inverse,&out_no_inverse,pri_key,bnMontCtx,ctx);
+    decrypt_mes= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,decrypt_mes,&zero,double_enc_mes,&key_inverse,ctx);
+    //共通要素の計算
+    // decrypt_mesとserver_enc_mesの比較
+    // 一緒ならばtrueそうでなければfalse
+    r=EC_POINT_cmp(ec_group,decrypt_mes,server_enc_mes,ctx);
+    if(r!=0){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare false");
+        return false;
+    }else{
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
+        return true;
+    }
+}

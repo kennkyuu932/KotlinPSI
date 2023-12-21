@@ -28,6 +28,9 @@ class ClientActivity : AppCompatActivity() {
 
     val enc_mes_list = mutableListOf<List<ByteArray>>()
 
+    //共通要素の場所が入ったリスト
+    val commonlist= mutableListOf<Int>()
+
     private val contactViewModel: ContactViewModel by viewModels {
         ContactViewModel.ContactViewmodelFactory((application as ContactApplication).repository)
     }
@@ -41,8 +44,14 @@ class ClientActivity : AppCompatActivity() {
         val ipaddr=intent.getStringExtra(MainActivity.server_ip)
         val radioflag=intent.getIntExtra(MainActivity.radioflag,0)
 
+        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
+        val f=createkeyClient(pri_key_kt)
+
         //サーバの持つ集合が暗号化されたもの
         val cli_res_encrypt_first= mutableListOf<List<ByteArray>>()
+        //サーバから送られる自分の集合
+        val double_enc_mes= mutableListOf<List<ByteArray>>()
+
         var resflag=0
 
         val clientObserver = Observer<Int>{ flag ->
@@ -62,8 +71,6 @@ class ClientActivity : AppCompatActivity() {
                                         Log.d(TAG, "onCreate: PSIStart")
                                         Log.d(TAG, "onCreate: PSI step2")
 
-                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                                        val f=createkeyClient(pri_key_kt)
                                         var i=1 //テスト用変数
                                         PSIencryptClient(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -85,8 +92,6 @@ class ClientActivity : AppCompatActivity() {
                                         Log.d(TAG, "onCreate: PSIStart")
                                         Log.d(TAG, "onCreate: PSI step2")
 
-                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                                        val f=createkeyClient(pri_key_kt)
                                         var i=1 //テスト用変数
                                         PSIencryptClient(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -112,8 +117,6 @@ class ClientActivity : AppCompatActivity() {
                                         Log.d(TAG, "onCreate: PSIStart")
                                         Log.d(TAG, "onCreate: PSI step2")
 
-                                        val pri_key_kt:ByteArray=ByteArray(pri_key_len)
-                                        val f=createkeyClient(pri_key_kt)
                                         var i=1 //テスト用変数
                                         PSIencryptClient(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -127,10 +130,51 @@ class ClientActivity : AppCompatActivity() {
                     Log.d(TAG, "onCreate: start step3")
                     Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
+                    lifecycleScope.launch {
+                        Log.d(TAG, "onCreate: step3 start back thread")
+                        var i=0
+                        Control.cli_res_size=null
+                        Control.ClientReceiveSize()
+                        val firstlistsize=Control.cli_res_size
+                        Control.cli_res_size?.let { Control.ClientSendNotice(it) }
+                        Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                        while(i<firstlistsize!!){
+                            //フラグを初期化
+                            Control.cli_res_size=null
+                            Control.ClientReceiveSize()
+                            val cli_res_encrypt_second= mutableListOf<ByteArray>()
+                            var j=0
+                            val secondlistsize=Control.cli_res_size
+                            Control.cli_res_size?.let { Control.ClientSendNotice(it) }
+                            while (j<secondlistsize!!){
+                                //フラグの初期化
+                                Control.cli_res_size=null
+                                Control.ClientReceiveSize()
+                                val thirdlistsize=Control.cli_res_size
+                                Log.d(TAG, "onCreate: thirdlistsize $thirdlistsize")
+                                Control.cli_res_size?.let { Control.ClientSendNotice(it) }
+                                if (thirdlistsize!=null){
+                                    Control.ClientReceive(thirdlistsize)
+                                }
+                                j++
+                                Control.cli_res_mes.let { cli_res_encrypt_second.add(it) }
+                                val res_size=Control.cli_res_mes.size
+                                Control.ClientSendNotice(res_size)
+                            }
+                            i++
+                            double_enc_mes.add(cli_res_encrypt_second)
+                        }
+                        resflag=1
+                        Control.ClientSendNotice(3)
+                        flagmodel.receiveflag.value=3
+                    }
                 }
                 3->{
                     Log.d(TAG, "onCreate: start step4")
                     Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "onCreate: double encrypt size ${double_enc_mes.size}")
+                    //復号と共通部分送信
+                    PSIdecryptcalc(double_enc_mes,cli_res_encrypt_first,pri_key_kt)
                 }
 
 
@@ -216,9 +260,39 @@ class ClientActivity : AppCompatActivity() {
         }
     }
 
+    fun PSIdecryptcalc(doubleenc:List<List<ByteArray>>,ser_enc_list:List<List<ByteArray>>,pri_key_kt: ByteArray){
+        Log.d(TAG, "PSIdecryptcalc: Start")
+
+        for (ser_list in ser_enc_list){
+            for (ser_enc_mes in ser_list){
+                var i=0
+                for (mes_list in doubleenc){
+                    var flag=true
+                    for (mes in mes_list){
+                        val e=decryptcalc(mes,ser_enc_mes,pri_key_kt)
+                        if(!e){
+                            flag=false
+                            break
+                        }
+                    }
+                    if(flag){
+                        commonlist.add(i)
+                        i++
+                    }
+                }
+            }
+        }
+        for (test in commonlist){
+            Log.d(TAG, "PSIdecryptcalc: $test")
+        }
+        Log.d(TAG, "PSIdecryptcalc: return")
+    }
+
     external fun createkeyClient(key: ByteArray):Boolean
 
     external fun encryptClient(message : Byte , key: ByteArray, out: ByteArray):Boolean
+
+    external fun decryptcalc(double_mes:ByteArray,ser_mes:ByteArray,key:ByteArray):Boolean
 
     companion object{
         init {

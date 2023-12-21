@@ -47,6 +47,8 @@ object Control {
             ser_serversoc?.reuseAddress=true
             Log.d(TAG, "ServerConnect: try")
             ser_socket= ser_serversoc?.accept()
+            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            ser_Dos= DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
             Log.d(TAG, "ServerConnect: finish")
         }catch (_:Exception){}
         Log.d(TAG, "ServerConnect: return")
@@ -57,6 +59,8 @@ object Control {
         try {
             if (cli_socket==null){
                 cli_socket= Socket(ipaddr, PORT)
+                cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+                cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
                 Log.d(TAG, "ClientConnect: finish")
             }
         }catch (_:Exception){}
@@ -69,10 +73,11 @@ object Control {
         try {
             Log.d(TAG, "ServerSend: try")
             val first_size = ser_mes.size
-            ser_Dos= DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
-            Log.d(TAG, "ServerSend: send frst list size $first_size")
+            //ser_Dos= DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
+            Log.d(TAG, "ServerSend: send first list size $first_size")
             ser_Dos?.writeInt(first_size)
             ser_Dos?.flush()
+            //Log.d(TAG, "ServerSend: ${ser_socket?.isOutputShutdown} : ${ser_socket?.isOutputShutdown}")
             //クライアントからの応答を受け取る
             ServerReceiveNotice()
             if(ser_res_size==first_size){
@@ -113,7 +118,7 @@ object Control {
         Log.d(TAG, "ServerNotice: Start")
         try {
             Log.d(TAG, "ServerNotice: try")
-            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_res_size=ser_Dis?.readInt()
             Log.d(TAG, "ServerNotice: $ser_res_size")
         }catch (_:Exception){}
@@ -124,7 +129,7 @@ object Control {
         Log.d(TAG, "ServerReceiveEnd: Start")
         try {
             Log.d(TAG, "ServerReceiveEnd: try")
-            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_end_flag= ser_Dis?.readInt()
             Log.d(TAG, "ServerReceiveEnd: receive $ser_end_flag")
         }catch (_:Exception){}
@@ -135,10 +140,7 @@ object Control {
         Log.d(TAG, "ServerReceive: Start")
         try {
             Log.d(TAG, "ServerReceiveSize: try")
-            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
-            if(ser_Dis==null){
-                Log.d(TAG, "ServerReceiveSize: ser_dis null")
-            }
+            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_res_size= ser_Dis?.readInt()
             Log.d(TAG, "ServerReceiveSize: $ser_res_size")
         }catch (_:Exception){}
@@ -149,7 +151,7 @@ object Control {
         Log.d(TAG, "ServerSendNotice: Start")
         try {
             Log.d(TAG, "ServerSendNotice: try")
-            ser_Dos=DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
+            //ser_Dos=DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
             ser_Dos?.writeInt(flag)
             ser_Dos?.flush()
         }catch (_:Exception){}
@@ -161,7 +163,7 @@ object Control {
         try {
             Log.d(TAG, "ServerReceive: try")
             ser_res_mes= ByteArray(res_size)
-            ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_Dis?.read(ser_res_mes,0,res_size)
             Log.d(TAG, "ServerReceive: message ${ser_res_mes.toString()}")
         }catch (_:Exception){}
@@ -173,7 +175,7 @@ object Control {
         try {
             Log.d(TAG, "ClientSend: try")
             val first_size=cli_mes.size
-            cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
+            //cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
             Log.d(TAG, "ClientSend: send first list size $first_size")
             cli_Dos?.writeInt(first_size)
             cli_Dos?.flush()
@@ -215,7 +217,7 @@ object Control {
         Log.d(TAG, "ClientReceiveEnd: Start")
         try {
             Log.d(TAG, "ClientReceiveEnd: try")
-            cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_end_flag= cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveEnd: $cli_end_flag")
         }catch (_:Exception){}
@@ -226,7 +228,7 @@ object Control {
         Log.d(TAG, "ClientReceiveNotice: Start")
         try {
             Log.d(TAG, "ClientReceiveNotice: try")
-            cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_res_size= cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveNotice: $cli_res_size")
         }catch (_:Exception){}
@@ -237,7 +239,8 @@ object Control {
         Log.d(TAG, "ClientReceiveSize: Start")
         try {
             Log.d(TAG, "ClientReceiveSize: try")
-            cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            //Log.d(TAG, "ClientReceiveSize: ${cli_Dis?.available()}")
             cli_res_size=cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveSize: $cli_res_size")
         }catch(_:Exception){}
@@ -249,7 +252,7 @@ object Control {
         try {
 //            sleep(1000)
             Log.d(TAG, "ClientSendFlag: try")
-            cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
+            //cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
             cli_Dos?.writeInt(flag)
             cli_Dos?.flush()
         }catch (_:Exception){}
@@ -263,7 +266,7 @@ object Control {
         try {
             Log.d(TAG, "ClientReceive: try")
             cli_res_mes=ByteArray(res_size)
-            cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
+            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_Dis?.read(cli_res_mes,0,res_size)
             //Log.d(TAG, "ClientReceive: message ${cli_res_mes.let { String(it) }}")
             Log.d(TAG, "ClientReceive: message ${cli_res_mes.toString()}")
@@ -283,7 +286,7 @@ object Control {
 
     //
 
-    fun ServerDisConnect(){
+    fun DisConnect(){
         Log.d(TAG, "ServerDisConnect: Start")
         ser_serversoc?.close()
         ser_socket?.close()

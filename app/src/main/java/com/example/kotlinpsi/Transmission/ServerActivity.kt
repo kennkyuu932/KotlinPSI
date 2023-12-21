@@ -31,7 +31,11 @@ class ServerActivity : AppCompatActivity() {
 
 
 
+    //自分の集合を暗号化したもの
     val enc_mes_list= mutableListOf<List<ByteArray>>()
+
+    //クライアントから受け取った集合を暗号化したもの
+    val enc_mes_double = mutableListOf<List<ByteArray>>()
 
     private val contactViewModel:ContactViewModel by viewModels {
         ContactViewModel.ContactViewmodelFactory((application as ContactApplication).repository)
@@ -46,6 +50,9 @@ class ServerActivity : AppCompatActivity() {
         val server_ip_text=findViewById<TextView>(R.id.server_ip)
 
         val radioflag=intent.getIntExtra(MainActivity.radioflag,0)
+
+        val pri_key_kt:ByteArray = ByteArray(pri_key_len)
+        val f=createKey(pri_key_kt)
 
         //クライアントから受け取った暗号データ
         val ser_res_list_first= mutableListOf<List<ByteArray>>()
@@ -96,6 +103,10 @@ class ServerActivity : AppCompatActivity() {
                     Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate: start step3")
                     Log.d(TAG, "onCreate: receive list size ${ser_res_list_first.size}")
+                    PSIdoubleencrypt(ser_res_list_first,pri_key_kt)
+                    Log.d(TAG, "onCreate: double encrypt success")
+                    Log.d(TAG, "onCreate: enc double size ${enc_mes_double.size}")
+                    PSISendSecond(enc_mes_double,serverviewmodel)
                 }
                 3->{
                     //step4 クライアントから共通部分の場所をもらう
@@ -121,8 +132,7 @@ class ServerActivity : AppCompatActivity() {
         }
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
 
-        val pri_key_kt:ByteArray = ByteArray(pri_key_len)
-        val f=createKey(pri_key_kt)
+
 
 
 
@@ -262,11 +272,37 @@ class ServerActivity : AppCompatActivity() {
         }
     }
 
+    fun PSIdoubleencrypt(mes_list_list:List<List<ByteArray>>,pri_key_kt: ByteArray){
+        Log.d(TAG, "PSIdoubleencrypt: Start")
+        var i=0
+        for (mes_list in mes_list_list){
+            val enc_result= mutableListOf<ByteArray>()
+            for (mes in mes_list){
+                val enc_mes : ByteArray= ByteArray(ec_point_length)
+                val e=encryptdouble(mes,pri_key_kt,enc_mes)
+                enc_result.add(enc_mes)
+            }
+            enc_mes_double.add(enc_result)
+        }
+        Log.d(TAG, "PSIdoubleencrypt: return")
+    }
+
+    fun PSISendSecond(doubleencmes:List<List<ByteArray>>,viewmodel: ServerViewModel){
+        Log.d(TAG, "PSISendSecond: Start")
+        lifecycleScope.launch {
+            Control.ServerSend(doubleencmes)
+            viewmodel.server_end_flag.value=Control.ser_end_flag
+        }
+        Log.d(TAG, "PSISendSecond: return")
+    }
+
 
 
     external fun createKey(key :ByteArray): Boolean
 
     external fun encryptSet(message: Byte, key: ByteArray, out: ByteArray):Boolean
+
+    external fun encryptdouble(enc_message: ByteArray, key: ByteArray, out: ByteArray):Boolean
 
 
     external fun aestest():Boolean
