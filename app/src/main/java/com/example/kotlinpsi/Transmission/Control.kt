@@ -67,6 +67,75 @@ object Control {
         Log.d(TAG, "ClientConnect: return")
     }
 
+    //
+    suspend fun ServerSend2(ser_mes:List<ByteArray>)= withContext(Dispatchers.IO){
+        Log.d(TAG, "ServerSend: Start")
+        try {
+            Log.d(TAG, "ServerSend2: try")
+            val firstsize=ser_mes.size
+            Log.d(TAG, "ServerSend2: send first list size $firstsize")
+            ser_Dos?.writeInt(firstsize)
+            ser_Dos?.flush()
+            ServerReceiveNotice()
+            if (ser_res_size==firstsize){
+                //フラグ初期化
+                ser_res_size=null
+                for (mes in ser_mes){
+                    ser_Dos?.writeInt(mes.size)
+                    ser_Dos?.flush()
+                    ServerReceiveNotice()
+                    if(ser_res_size==mes.size){
+                        Log.d(TAG, "ServerSend2: start send message")
+                        ser_Dos?.write(mes,0,mes.size)
+                        ser_Dos?.flush()
+                        ServerReceiveNotice()
+                        if(ser_res_size!=mes.size){
+                            Log.d(TAG, "ServerSend2: miss send")
+                            break
+                        }
+                    }
+                }
+                ServerReceiveEnd()
+            }
+        }catch (_:Exception){}
+        Log.d(TAG, "ServerSend: return")
+    }
+
+    suspend fun ClientSend2(cli_mes:List<ByteArray>)= withContext(Dispatchers.IO){
+        Log.d(TAG, "ClientSend2: Start")
+        try {
+            Log.d(TAG, "ClientSend2: try")
+            val firstlistsize=cli_mes.size
+            Log.d(TAG, "ClientSend2: send first list size $firstlistsize")
+            cli_Dos?.writeInt(firstlistsize)
+            cli_Dos?.flush()
+            ClientReceiveNotice()
+            if(cli_res_size==firstlistsize){
+                //フラグ初期化
+                cli_res_size=null
+                for (mes in cli_mes){
+                    cli_Dos?.writeInt(mes.size)
+                    cli_Dos?.flush()
+                    ClientReceiveNotice()
+                    if(cli_res_size==mes.size){
+                        Log.d(TAG, "ClientSend2: Start send message")
+                        cli_Dos?.write(mes,0,mes.size)
+                        cli_Dos?.flush()
+                        ClientReceiveNotice()
+                        if(cli_res_size!=mes.size){
+                            Log.d(TAG, "ClientSend2: miss send")
+                            break
+                        }
+                    }
+                }
+                ClientReceiveEnd()
+            }
+        }catch (_:Exception){}
+    }
+
+
+    //
+
     //テスト1
     suspend fun ServerSend(ser_mes:List<List<ByteArray>>)= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerSend: Start")

@@ -33,9 +33,11 @@ class ServerActivity : AppCompatActivity() {
 
     //自分の集合を暗号化したもの
     val enc_mes_list= mutableListOf<List<ByteArray>>()
+    val enc_mes_list2= mutableListOf<ByteArray>()
 
     //クライアントから受け取った集合を暗号化したもの
     val enc_mes_double = mutableListOf<List<ByteArray>>()
+    val enc_mes_double2 = mutableListOf<ByteArray>()
 
     private val contactViewModel:ContactViewModel by viewModels {
         ContactViewModel.ContactViewmodelFactory((application as ContactApplication).repository)
@@ -56,6 +58,7 @@ class ServerActivity : AppCompatActivity() {
 
         //クライアントから受け取った暗号データ
         val ser_res_list_first= mutableListOf<List<ByteArray>>()
+        val ser_res_list_first2= mutableListOf<ByteArray>()
 
         val mserendflagObserver = Observer<Int>{ flag ->
             when(flag){
@@ -65,37 +68,61 @@ class ServerActivity : AppCompatActivity() {
 
                     //受け取り(step2)
                     lifecycleScope.launch {
+                        //
                         var i=0
                         Control.ServerReceiveSize()
                         val firstlistsize=Control.ser_res_size
                         Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                        Log.d(TAG, "onCreate: Outside loop Server ${firstlistsize}")
+                        Log.d(TAG, "onCreate: Otside loop $firstlistsize")
                         while (i<firstlistsize!!){
+                            //フラグ初期化
                             Control.ser_res_size=null
                             Control.ServerReceiveSize()
-                            val ser_res_encrypt_second = mutableListOf<ByteArray>()
-                            var j=0
-                            val secondlistsize = Control.ser_res_size
+                            val secondlistsize=Control.ser_res_size
                             Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                            while (j<secondlistsize!!){
-                                Control.ser_res_size=null
-                                Control.ServerReceiveSize()
-                                val thirdlistsize=Control.ser_res_size
-                                Log.d(TAG, "onCreate: thirdlistsize $thirdlistsize")
-                                Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                                if (thirdlistsize!=null){
-                                    Control.ServerReceive(thirdlistsize)
-                                }
-                                j++
-                                Control.ser_res_mes.let { ser_res_encrypt_second.add(it) }
-                                val res_size=Control.ser_res_mes.size
-                                Control.ServerSendNotice(res_size)
+                            if(secondlistsize!=null){
+                                Control.ServerReceive(secondlistsize)
                             }
+                            Control.ser_res_mes.let { ser_res_list_first2.add(it) }
+                            val res_size=Control.ser_res_mes.size
+                            Control.ServerSendNotice(res_size)
                             i++
-                            ser_res_list_first.add(ser_res_encrypt_second)
                         }
                         Control.ServerSendNotice(2)
                         serverviewmodel.server_end_flag.value=2
+
+                        //
+//                        var i=0
+//                        Control.ServerReceiveSize()
+//                        val firstlistsize=Control.ser_res_size
+//                        Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//                        Log.d(TAG, "onCreate: Outside loop Server ${firstlistsize}")
+//                        while (i<firstlistsize!!){
+//                            Control.ser_res_size=null
+//                            Control.ServerReceiveSize()
+//                            val ser_res_encrypt_second = mutableListOf<ByteArray>()
+//                            var j=0
+//                            val secondlistsize = Control.ser_res_size
+//                            Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//                            while (j<secondlistsize!!){
+//                                Control.ser_res_size=null
+//                                Control.ServerReceiveSize()
+//                                val thirdlistsize=Control.ser_res_size
+//                                Log.d(TAG, "onCreate: thirdlistsize $thirdlistsize")
+//                                Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+//                                if (thirdlistsize!=null){
+//                                    Control.ServerReceive(thirdlistsize)
+//                                }
+//                                j++
+//                                Control.ser_res_mes.let { ser_res_encrypt_second.add(it) }
+//                                val res_size=Control.ser_res_mes.size
+//                                Control.ServerSendNotice(res_size)
+//                            }
+//                            i++
+//                            ser_res_list_first.add(ser_res_encrypt_second)
+//                        }
+//                        Control.ServerSendNotice(2)
+//                        serverviewmodel.server_end_flag.value=2
                     }
                 }
                 2->{
@@ -103,10 +130,12 @@ class ServerActivity : AppCompatActivity() {
                     Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate: start step3")
                     Log.d(TAG, "onCreate: receive list size ${ser_res_list_first.size}")
-                    PSIdoubleencrypt(ser_res_list_first,pri_key_kt)
+//                    PSIdoubleencrypt(ser_res_list_first,pri_key_kt)
+                    PSIdubleencrypt2(ser_res_list_first2,pri_key_kt)
                     Log.d(TAG, "onCreate: double encrypt success")
                     Log.d(TAG, "onCreate: enc double size ${enc_mes_double.size}")
-                    PSISendSecond(enc_mes_double,serverviewmodel)
+//                    PSISendSecond(enc_mes_double,serverviewmodel)
+                    PSISendSecond2(enc_mes_double2,serverviewmodel)
                 }
                 3->{
                     //step4 クライアントから共通部分の場所をもらう
@@ -164,8 +193,10 @@ class ServerActivity : AppCompatActivity() {
                     contacts -> contacts.let {
                         Log.d(TAG, "onCreate: PSIStart")
                         Log.d(TAG, "onCreate: ${contacts.size}")
-                        PSIencrypt(contacts, pri_key_kt)
-                        PSISend_first(enc_mes_list,serverviewmodel)
+//                        PSIencrypt(contacts, pri_key_kt)
+//                        PSISend_first(enc_mes_list,serverviewmodel)
+                        PSIencryptArray(contacts,pri_key_kt)
+                        PSISendfirst2(enc_mes_list2,serverviewmodel)
                     }
                 }
             }
@@ -296,11 +327,58 @@ class ServerActivity : AppCompatActivity() {
         Log.d(TAG, "PSISendSecond: return")
     }
 
+    fun PSIencryptArray(contacts: List<Contact>, pri_key_kt: ByteArray){
+        Log.d(TAG, "onCreate: ${contacts}")
+        for (mes in contacts){
+            val enc_mes = ByteArray(ec_point_length)
+            val e=encryptSetArray(mes.name,pri_key_kt,enc_mes)
+            enc_mes_list2.add(enc_mes)
+        }
+
+        Log.d(TAG, "onCreate: PSI finish step1 No.${contacts.size}")
+    }
+
+    fun PSISendfirst2(encmes:List<ByteArray>,viewmodel: ServerViewModel){
+        Log.d(TAG, "onCreate: send my encrypt data to client")
+        Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            Log.d(TAG, "onCreate: Start connect to client")
+            Control.ServerConnect()
+            Log.d(TAG, "onCreate: Send encrypt message to Client")
+            Control.ServerSend2(encmes)
+            viewmodel.server_end_flag.value=Control.ser_end_flag
+            Log.d(TAG, "PSISend_first: return")
+//            Log.d(TAG, "onCreate: Start Receive client encrypt message")
+//            Control.ServerReceive()
+        }
+    }
+
+    fun PSIdubleencrypt2(mes_list:List<ByteArray>,pri_key_kt: ByteArray){
+        Log.d(TAG, "PSIdubleencrypt2: Start")
+        for (mes in mes_list){
+            val encmes=ByteArray(ec_point_length)
+            val e=encryptdouble(mes,pri_key_kt,encmes)
+            enc_mes_double2.add(encmes)
+        }
+        Log.d(TAG, "PSIdubleencrypt2: return")
+    }
+
+    fun PSISendSecond2(doubleencmes: List<ByteArray>,viewmodel: ServerViewModel){
+        Log.d(TAG, "PSISendSecond2: Start")
+        lifecycleScope.launch {
+            Control.ServerSend2(doubleencmes)
+            viewmodel.server_end_flag.value=Control.ser_end_flag
+        }
+        Log.d(TAG, "PSISendSecond2: return")
+    }
+
 
 
     external fun createKey(key :ByteArray): Boolean
 
     external fun encryptSet(message: Byte, key: ByteArray, out: ByteArray):Boolean
+
+    external fun encryptSetArray(message:ByteArray,key:ByteArray,out: ByteArray):Boolean
 
     external fun encryptdouble(enc_message: ByteArray, key: ByteArray, out: ByteArray):Boolean
 

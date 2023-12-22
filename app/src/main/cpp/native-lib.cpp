@@ -462,6 +462,7 @@ Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptdouble(JNIEnv *env
         __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt to binary false (double encrypt)");
         return false;
     }
+    //__android_log_print(ANDROID_LOG_DEBUG,"debugtest","mes_len = %d out_len = %zu",mes_len,out_len);
     __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt to binary true (double encrypt)");
     env->SetByteArrayRegion(out,0,out_len,(jbyte *)out_binary_set);
 
@@ -519,4 +520,88 @@ Java_com_example_kotlinpsi_Transmission_ClientActivity_decryptcalc(JNIEnv *env, 
         __android_log_print(ANDROID_LOG_DEBUG,"cpp","compare true");
         return true;
     }
+}
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ServerActivity_encryptSetArray(JNIEnv *env, jobject thiz,
+                                                                       jbyteArray message,
+                                                                       jbyteArray key,
+                                                                       jbyteArray out) {
+    int key_len=(int) env->GetArrayLength(key);
+    uint8_t pri_key_byte[key_len];
+    env->GetByteArrayRegion(key,0,key_len,(jbyte *)pri_key_byte);
+    int mes_len=(int) env->GetArrayLength(message);
+    uint8_t mes_byte[mes_len];
+    env->GetByteArrayRegion(message,0,mes_len,(jbyte *)mes_byte);
+    BIGNUM *pri_key;
+    pri_key= BN_bin2bn(pri_key_byte,key_len, nullptr);
+    if(pri_key==nullptr){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","private key is NULL");
+    }
+    EC_GROUP *ec_group= EC_GROUP_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    EC_POINT *px;
+    BIGNUM *x;
+    x= BN_bin2bn(mes_byte,mes_len, nullptr);
+    r= EC_POINT_mul(ec_group,ps,pri_key,inf,&zero,ctx);
+    px= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,px,&zero,ps,x,ctx);
+    //バイナリデータに変換
+    uint8_t *px_binary;
+    size_t binary_len;
+    if(!ec_point_to_binary(ec_group,px,&px_binary,&binary_len,ctx)) {
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","ecpoint to binary false");
+        return false;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt and exchange ecpoint to byte");
+    env->SetByteArrayRegion(out,0,binary_len,(jbyte *)px_binary);
+    return true;
+}
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlinpsi_Transmission_ClientActivity_encryptArrayClient(JNIEnv *env, jobject thiz,
+                                                                          jbyteArray message,
+                                                                          jbyteArray key,
+                                                                          jbyteArray out) {
+    int key_len=(int) env->GetArrayLength(key);
+    uint8_t pri_key_byte[key_len];
+    env->GetByteArrayRegion(key,0,key_len,(jbyte *)pri_key_byte);
+    int mes_len=(int) env->GetArrayLength(message);
+    uint8_t mes_byte[mes_len];
+    env->GetByteArrayRegion(message,0,mes_len,(jbyte *)mes_byte);
+    BIGNUM *pri_key;
+    pri_key= BN_bin2bn(pri_key_byte,key_len, nullptr);
+    if(pri_key==nullptr){
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","private key is NULL");
+    }
+    EC_GROUP *ec_group= EC_GROUP_new_by_curve_name(EC_curve_nist2nid("P-256"));
+    EC_POINT *ps= EC_POINT_new(ec_group);
+    EC_POINT *inf= EC_POINT_new(ec_group);
+    int r = EC_POINT_set_to_infinity(ec_group,inf);
+    BN_CTX *ctx = BN_CTX_new();
+    BIGNUM zero;
+    BN_init(&zero);
+    BN_zero(&zero);
+    EC_POINT *px;
+    BIGNUM *x;
+    x= BN_bin2bn(mes_byte,mes_len, nullptr);
+    r= EC_POINT_mul(ec_group,ps,pri_key,inf,&zero,ctx);
+    px= EC_POINT_new(ec_group);
+    r= EC_POINT_mul(ec_group,px,&zero,ps,x,ctx);
+    //バイナリデータに変換
+    uint8_t *px_binary;
+    size_t binary_len;
+    if(!ec_point_to_binary(ec_group,px,&px_binary,&binary_len,ctx)) {
+        __android_log_print(ANDROID_LOG_DEBUG,"cpp","ecpoint to binary false");
+        return false;
+    }
+    __android_log_print(ANDROID_LOG_DEBUG,"cpp","encrypt and exchange ecpoint to byte");
+    env->SetByteArrayRegion(out,0,binary_len,(jbyte *)px_binary);
+    return true;
 }
