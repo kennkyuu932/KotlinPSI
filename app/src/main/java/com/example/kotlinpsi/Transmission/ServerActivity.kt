@@ -23,8 +23,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlinpsi.Database.Contact
 import com.example.kotlinpsi.MainActivity
 import kotlinx.coroutines.launch
+import java.sql.Timestamp
 import java.time.LocalDateTime
-import kotlin.math.log
 
 class ServerActivity : AppCompatActivity() {
 
@@ -92,7 +92,7 @@ class ServerActivity : AppCompatActivity() {
                         Control.ServerReceiveSize()
                         val firstlistsize=Control.ser_res_size
                         Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                        Log.d(TAG, "onCreate: Otside loop $firstlistsize")
+                        //Log.d(TAG, "onCreate: Otside loop $firstlistsize")
                         while (i<firstlistsize!!){
                             //フラグ初期化
                             Control.ser_res_size=null
@@ -120,13 +120,13 @@ class ServerActivity : AppCompatActivity() {
                 3->{
                     //step4 クライアントから共通部分の場所をもらう
                     Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "onCreate: start step4")
+                    //Log.d(TAG, "onCreate: start step4")
                     lifecycleScope.launch {
                         var i=0
                         Control.ServerReceiveSize()
                         val firstlistsize = Control.ser_res_size
                         Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                        Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                        //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
                         while (i<firstlistsize!!){
                             Control.ser_res_size=null
                             Control.ServerReceiveCommonList()
@@ -139,7 +139,7 @@ class ServerActivity : AppCompatActivity() {
                     }
                 }
                 4->{
-                    Log.d(TAG, "onCreate: finish")
+                    //Log.d(TAG, "onCreate: finish")
                     Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
                     //接続解除
                     Control.DisConnectServer()
@@ -169,17 +169,19 @@ class ServerActivity : AppCompatActivity() {
 
         when (radioflag) {
             0 -> {
-                Log.d(TAG, "onCreate: 全部のデータでPSI")
+                //Log.d(TAG, "onCreate: 全部のデータでPSI")
                 contactViewModel.allLists.observe(this) { contacts ->
                     contacts.let {
                         PSIList=contacts
+                        Log.d(MainActivity.TAG_TIME, "onCreate: Start encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
                         PSIencryptArray(contacts,pri_key_kt)
+                        Log.d(MainActivity.TAG_TIME, "onCreate: finish encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
                         PSISendfirst(enc_mes_list,serverviewmodel)
                     }
                 }
             }
             1->{
-                Log.d(TAG, "onCreate: 現時点から1ヶ月分のデータでPSI")
+                //Log.d(TAG, "onCreate: 現時点から1ヶ月分のデータでPSI")
                 val now = LocalDateTime.now()
                 val start:LocalDateTime
                 if(now.monthValue==1){
@@ -196,7 +198,7 @@ class ServerActivity : AppCompatActivity() {
                 }
             }
             3->{
-                Log.d(TAG, "onCreate: 現時点から3ヶ月分のデータでPSI")
+                //Log.d(TAG, "onCreate: 現時点から3ヶ月分のデータでPSI")
                 val now = LocalDateTime.now()
                 val start:LocalDateTime
                 if(now.monthValue==3){
@@ -222,46 +224,45 @@ class ServerActivity : AppCompatActivity() {
 
 
     fun PSIencryptArray(contacts: List<Contact>, pri_key_kt: ByteArray){
-        Log.d(TAG, "PSIencryptArray: ${contacts}")
+        //Log.d(TAG, "PSIencryptArray: ${contacts}")
         for (mes in contacts){
             val enc_mes = ByteArray(ec_point_length)
             val e=encryptSetArray(mes.name,pri_key_kt,enc_mes)
             enc_mes_list.add(enc_mes)
         }
-
-        Log.d(TAG, "PSIencryptArray: PSI finish step1 No.${contacts.size}")
+        //Log.d(TAG, "PSIencryptArray: PSI finish step1 No.${contacts.size}")
     }
 
     fun PSISendfirst(encmes:List<ByteArray>,viewmodel: ServerViewModel){
-        Log.d(TAG, "PSISend_first: send my encrypt data to client")
+        //Log.d(TAG, "PSISend_first: send my encrypt data to client")
         Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            Log.d(TAG, "PSISend_first: Start connect to client")
+            //Log.d(TAG, "PSISend_first: Start connect to client")
             Control.ServerConnect()
-            Log.d(TAG, "PSISend_first: Send encrypt message to Client")
+            //Log.d(TAG, "PSISend_first: Send encrypt message to Client")
             Control.ServerSend(encmes)
             viewmodel.server_end_flag.value=Control.ser_end_flag
-            Log.d(TAG, "PSISend_first: return")
+            //Log.d(TAG, "PSISend_first: return")
         }
     }
 
     fun PSIdubleencrypt(mes_list:List<ByteArray>,pri_key_kt: ByteArray){
-        Log.d(TAG, "PSIdubleencrypt: Start")
+        //Log.d(TAG, "PSIdubleencrypt: Start")
         for (mes in mes_list){
             val encmes=ByteArray(ec_point_length)
             val e=encryptdouble(mes,pri_key_kt,encmes)
             enc_mes_double.add(encmes)
         }
-        Log.d(TAG, "PSIdubleencrypt: return")
+        //Log.d(TAG, "PSIdubleencrypt: return")
     }
 
     fun PSISendSecond(doubleencmes: List<ByteArray>,viewmodel: ServerViewModel){
-        Log.d(TAG, "PSISendSecond: Start")
+        //Log.d(TAG, "PSISendSecond: Start")
         lifecycleScope.launch {
             Control.ServerSend(doubleencmes)
             viewmodel.server_end_flag.value=Control.ser_end_flag
         }
-        Log.d(TAG, "PSISendSecond: return")
+        //Log.d(TAG, "PSISendSecond: return")
     }
 
 

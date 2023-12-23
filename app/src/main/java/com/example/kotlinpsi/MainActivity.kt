@@ -69,14 +69,14 @@ class MainActivity : AppCompatActivity() {
 
         val serbutton=binding.serverPsi
         serbutton.setOnClickListener {
-            Log.d(TAG, "onCreate: push server psi button")
+            //Log.d(TAG, "onCreate: push server psi button")
             val intent=Intent(this,ServerActivity::class.java)
             intent.putExtra(radioflag,radio)
             startActivity(intent)
         }
         val clibutton=binding.clientPsi
         clibutton.setOnClickListener {
-            Log.d(TAG, "onCreate: push client psi button")
+            //Log.d(TAG, "onCreate: push client psi button")
             val intent=Intent(this,ClientActivity::class.java)
             intent.putExtra(server_ip,ip_text.text.toString())
             intent.putExtra(radioflag,radio)
@@ -86,17 +86,17 @@ class MainActivity : AppCompatActivity() {
 
         val radio1month=binding.radioMonthlater
         radio1month.setOnClickListener {
-            Log.d(TAG, "onCreate: radio 1")
+            //Log.d(TAG, "onCreate: radio 1")
             radio=1
         }
         val radio3month=binding.radio3monthlater
         radio3month.setOnClickListener {
-            Log.d(TAG, "onCreate: radio 3")
+            //Log.d(TAG, "onCreate: radio 3")
             radio=3
         }
         val radioall=binding.radioAll
         radioall.setOnClickListener {
-            Log.d(TAG, "onCreate: radio 0")
+            //Log.d(TAG, "onCreate: radio 0")
             radio=0
         }
 
@@ -127,6 +127,8 @@ class MainActivity : AppCompatActivity() {
         val server_ip = "SERVERIP"
         val radioflag = "RADIOBUTTON"
 
+        //時間計測のためのTAG
+        val TAG_TIME = "TIME_to_PSI"
 
         public lateinit var test:String
     }

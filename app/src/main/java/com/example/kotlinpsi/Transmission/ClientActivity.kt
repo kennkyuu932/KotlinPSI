@@ -75,14 +75,14 @@ class ClientActivity : AppCompatActivity() {
             //自分が暗号化した履歴をサーバーが暗号化して送ってくるためそれを受け取り，共通部分を計算して送る
             when(flag){
                 1 ->{
-                    Log.d(TAG, "onCreate: step2 Start")
+                    //Log.d(TAG, "onCreate: step2 Start")
                     Toast.makeText(this,"start step2",Toast.LENGTH_SHORT).show()
                     //
                     when(radioflag){
                         0 ->{
                             contactViewModel.allLists.observe(this){
                                     contacts -> contacts.let {
-                                        Log.d(TAG, "onCreate: PSI step2")
+                                        //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
                                         PSIencryptArray(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -99,7 +99,7 @@ class ClientActivity : AppCompatActivity() {
                             }
                             contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                                     contacts -> contacts.let {
-                                        Log.d(TAG, "onCreate: PSI step2")
+                                        //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
                                         PSIencryptArray(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -120,7 +120,7 @@ class ClientActivity : AppCompatActivity() {
                             }
                             contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                                     contacts -> contacts.let {
-                                        Log.d(TAG, "onCreate: PSI step2")
+                                        //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
                                         PSIencryptArray(contacts,pri_key_kt)
                                         PSISendClient(enc_mes_list,flagmodel)
@@ -131,17 +131,17 @@ class ClientActivity : AppCompatActivity() {
                 }
                 2->{
                     //step3 サーバが暗号化したクライアントの集合を受け取る
-                    Log.d(TAG, "onCreate: start step3")
+                    //Log.d(TAG, "onCreate: start step3")
                     Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
+                    //Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
                     lifecycleScope.launch {
-                        Log.d(TAG, "onCreate: step3 start back thread")
+                        //Log.d(TAG, "onCreate: step3 start back thread")
                         //
                         var i=0
                         Control.ClientReceiveSize()
                         val firstlistsize=Control.cli_res_size
                         Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                        Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                        //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
                         while (i<firstlistsize!!){
                             //フラグ初期化
                             Control.cli_res_size=null
@@ -161,7 +161,7 @@ class ClientActivity : AppCompatActivity() {
                     }
                 }
                 3->{
-                    Log.d(TAG, "onCreate: start step4")
+                    //Log.d(TAG, "onCreate: start step4")
                     Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: double encrypt size ${double_enc_mes.size}")
                     //復号と共通部分送信
@@ -169,7 +169,7 @@ class ClientActivity : AppCompatActivity() {
                     PSISendCommonlist(commonlist_to_server,flagmodel)
                 }
                 4->{
-                    Log.d(TAG, "onCreate: finish")
+                    //Log.d(TAG, "onCreate: finish")
                     //接続解除
                     Control.DisConnectClient()
                     Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
@@ -203,7 +203,7 @@ class ClientActivity : AppCompatActivity() {
                 Control.ClientReceiveSize()
                 val firstlistsize=Control.cli_res_size
                 Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
                 while (i<firstlistsize!!){
                     //フラグ初期化
                     Control.cli_res_size=null
@@ -226,7 +226,7 @@ class ClientActivity : AppCompatActivity() {
     }
 
     fun PSIencryptArray(contacts: List<Contact>, pri_key_kt: ByteArray){
-        Log.d(TAG, "PSIencryptArray: ${contacts}")
+        //Log.d(TAG, "PSIencryptArray: ${contacts}")
         for (mes in contacts){
             val encmes=ByteArray(ec_point_length)
             val e=encryptArrayClient(mes.name,pri_key_kt,encmes)
@@ -235,17 +235,17 @@ class ClientActivity : AppCompatActivity() {
     }
 
     fun PSISendClient(encmes:List<ByteArray>,viewmodel: ClientViewModel){
-        Log.d(TAG, "PSISendClient: send data to server")
+        //Log.d(TAG, "PSISendClient: send data to server")
         //Toast.makeText(this,"通信開始(Client to Server)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             Control.ClientSend(encmes)
             viewmodel.receiveflag.value=Control.cli_end_flag
-            Log.d(TAG, "PSISendClient: return")
+            //Log.d(TAG, "PSISendClient: return")
         }
     }
 
     fun PSIdecryptcalc(doubleencmes:List<ByteArray>,ser_enc:List<ByteArray>,pri_key_kt: ByteArray){
-        Log.d(TAG, "PSIdecryptcalc: Start")
+        //Log.d(TAG, "PSIdecryptcalc: Start")
         var e=false
         var server_count = 0
         commonlist_to_server= BooleanArray(ser_enc.size)
