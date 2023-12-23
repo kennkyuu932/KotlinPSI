@@ -16,4 +16,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.094" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_server"
+        android:layout_width="409dp"
+        android:layout_height="642dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/server_ip" />
+
+    <TextView
+        android:id="@+id/common_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="通信相手と接触していた時間"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_server"
+        app:layout_constraintEnd_toStartOf="@+id/server_ip"
+        app:layout_constraintHorizontal_bias="0.051"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.797" />
 </androidx.constraintlayout.widget.ConstraintLayout>

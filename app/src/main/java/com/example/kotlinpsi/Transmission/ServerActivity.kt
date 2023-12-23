@@ -18,6 +18,8 @@ import com.example.kotlinpsi.Database.ContactViewModel
 import com.example.kotlinpsi.R
 import java.net.Inet4Address
 import androidx.lifecycle.observe
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlinpsi.Database.Contact
 import com.example.kotlinpsi.MainActivity
 import kotlinx.coroutines.launch
@@ -51,14 +53,27 @@ class ServerActivity : AppCompatActivity() {
 
         val server_ip_text=findViewById<TextView>(R.id.server_ip)
 
+        val adapter=CommonListAdapter()
+        val recycler = findViewById<RecyclerView>(R.id.recycler_server)
+        recycler.adapter=adapter
+        recycler.layoutManager=LinearLayoutManager(this)
+
         val radioflag=intent.getIntExtra(MainActivity.radioflag,0)
 
         val pri_key_kt:ByteArray = ByteArray(pri_key_len)
         val f=createKey(pri_key_kt)
 
+        //PSIに使うデータのリスト
+        var PSIList : List<Contact> = emptyList()
+
         //クライアントから受け取った暗号データ
         val ser_res_list_first= mutableListOf<List<ByteArray>>()
         val ser_res_list_first2= mutableListOf<ByteArray>()
+
+        //クライアントから送られてくる共通部分が入ったデータ
+        val ser_res_common = mutableListOf<Boolean>()
+        //サーバーが共通部分を表示するためのリスト
+        val commonList = mutableListOf<Contact>()
 
         val mserendflagObserver = Observer<Int>{ flag ->
             when(flag){
@@ -141,6 +156,41 @@ class ServerActivity : AppCompatActivity() {
                     //step4 クライアントから共通部分の場所をもらう
                     Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate: start step4")
+                    lifecycleScope.launch {
+                        var i=0
+                        Control.ServerReceiveSize()
+                        val firstlistsize = Control.ser_res_size
+                        Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+                        Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                        while (i<firstlistsize!!){
+                            Control.ser_res_size=null
+                            Control.ServerReceiveCommonList()
+                            Control.ser_res_common?.let { ser_res_common.add(it) }
+                            Control.ServerSendNotice(1)
+                            i++
+                        }
+                        Control.ServerSendNotice(4)
+                        serverviewmodel.server_end_flag.value=4
+                    }
+                }
+                4->{
+                    Log.d(TAG, "onCreate: finish")
+                    Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
+                    //接触時間の表示
+                    var i=0
+                    for(bool in ser_res_common){
+                        if (bool){
+                            if(commonList.size!=0){
+                                   if(PSIList[i-1].date!=PSIList[i].date){
+                                       commonList.add(PSIList[i])
+                                   }
+                            }else{
+                                commonList.add(PSIList[i])
+                            }
+                        }
+                        i++
+                    }
+                    adapter.submitList(commonList)
                 }
             }
 
@@ -193,6 +243,7 @@ class ServerActivity : AppCompatActivity() {
                     contacts -> contacts.let {
                         Log.d(TAG, "onCreate: PSIStart")
                         Log.d(TAG, "onCreate: ${contacts.size}")
+                        PSIList=contacts
 //                        PSIencrypt(contacts, pri_key_kt)
 //                        PSISend_first(enc_mes_list,serverviewmodel)
                         PSIencryptArray(contacts,pri_key_kt)

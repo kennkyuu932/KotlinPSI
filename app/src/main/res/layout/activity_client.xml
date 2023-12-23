@@ -6,4 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".Transmission.ClientActivity">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_client"
+        android:layout_width="409dp"
+        android:layout_height="585dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/common_clitent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="56dp"
+        android:text="通信相手と接触した板時間"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_client"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.096"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.732" />
 </androidx.constraintlayout.widget.ConstraintLayout>

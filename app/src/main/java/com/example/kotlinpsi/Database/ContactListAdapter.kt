@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlinpsi.R
 
-class ContactListAdapter : ListAdapter<Contact, ContactListAdapter.ContactViewHolder>(CONTACTS_COMPARAOR) {
+class ContactListAdapter : ListAdapter<Contact, ContactListAdapter.ContactViewHolder>(CONTACTS_COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         return ContactViewHolder.create(parent)
@@ -37,7 +37,7 @@ class ContactListAdapter : ListAdapter<Contact, ContactListAdapter.ContactViewHo
     }
 
     companion object{
-        private val CONTACTS_COMPARAOR=object : DiffUtil.ItemCallback<Contact>(){
+        private val CONTACTS_COMPARATOR=object : DiffUtil.ItemCallback<Contact>(){
             override fun areItemsTheSame(oldItem: Contact, newItem: Contact): Boolean {
                 return oldItem==newItem
             }

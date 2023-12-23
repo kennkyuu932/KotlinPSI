@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlinpsi.Database.Contact
 import com.example.kotlinpsi.Database.ContactApplication
 import com.example.kotlinpsi.Database.ContactViewModel
@@ -50,8 +52,16 @@ class ClientActivity : AppCompatActivity() {
         val ipaddr=intent.getStringExtra(MainActivity.server_ip)
         val radioflag=intent.getIntExtra(MainActivity.radioflag,0)
 
+        val adapter = CommonListAdapter()
+        val recycler = findViewById<RecyclerView>(R.id.recycler_client)
+        recycler.adapter=adapter
+        recycler.layoutManager=LinearLayoutManager(this)
+
         val pri_key_kt:ByteArray=ByteArray(pri_key_len)
         val f=createkeyClient(pri_key_kt)
+
+        //PSIに使うデータのリスト
+        var PSIList : List<Contact> = emptyList()
 
         //サーバの持つ集合が暗号化されたもの
         val cli_res_encrypt_first= mutableListOf<List<ByteArray>>()
@@ -59,6 +69,9 @@ class ClientActivity : AppCompatActivity() {
         //サーバから送られる自分の集合
         val double_enc_mes= mutableListOf<List<ByteArray>>()
         val double_enc_mes2= mutableListOf<ByteArray>()
+
+        //共通集合を表示するためのリスト
+        val commonList = mutableListOf<Contact>()
 
         var resflag=0
 
@@ -99,6 +112,7 @@ class ClientActivity : AppCompatActivity() {
                                         //Toast.makeText(this,"PSI開始",Toast.LENGTH_SHORT).show()
                                         Log.d(TAG, "onCreate: PSIStart")
                                         Log.d(TAG, "onCreate: PSI step2")
+                                        PSIList=contacts
 
                                         var i=1 //テスト用変数
 //                                        PSIencryptClient(contacts,pri_key_kt)
@@ -212,6 +226,26 @@ class ClientActivity : AppCompatActivity() {
                     Log.d(TAG, "onCreate: start step4 double enc size ${double_enc_mes2.size}")
                     //PSIdecryptcalc(double_enc_mes,cli_res_encrypt_first,pri_key_kt)
                     PSIdecryptcalc2(double_enc_mes2,cli_res_encrypt_first2,pri_key_kt)
+                    PSISendCommonlist(commonlist_to_server,flagmodel)
+                }
+                4->{
+                    Log.d(TAG, "onCreate: finish")
+                    Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
+                    //接触していた時間を画面に出力
+                    var i=0
+                    for(bool in commonlist_for_client){
+                        if (bool){
+                            if(commonList.size!=0){
+                                if(PSIList[i-1].date!=PSIList[i].date){
+                                    commonList.add(PSIList[i])
+                                }
+                            }else{
+                                commonList.add(PSIList[i])
+                            }
+                        }
+                        i++
+                    }
+                    adapter.submitList(commonList)
                 }
 
 
@@ -426,11 +460,18 @@ class ClientActivity : AppCompatActivity() {
             }
             server_count++
         }
-        for (test in commonlist_for_client){
-            Log.d(TAG, "PSIdecryptcalc2: commonlist for client : ${test.toString()}")
-        }
-        for(test in commonlist_to_server){
-            Log.d(TAG, "PSIdecryptcalc2: commonlist to server : ${test.toString()}")
+//        for (test in commonlist_for_client){
+//            Log.d(TAG, "PSIdecryptcalc2: commonlist for client : ${test.toString()}")
+//        }
+//        for(test in commonlist_to_server){
+//            Log.d(TAG, "PSIdecryptcalc2: commonlist to server : ${test.toString()}")
+//        }
+    }
+
+    fun PSISendCommonlist(array: BooleanArray,viewmodel: ClientViewModel){
+        lifecycleScope.launch {
+            Control.ClientSendCommonlist(array)
+            viewmodel.receiveflag.value=Control.cli_end_flag
         }
     }
 

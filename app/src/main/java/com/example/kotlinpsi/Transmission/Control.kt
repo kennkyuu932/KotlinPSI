@@ -18,6 +18,7 @@ object Control {
     var cli_res_size:Int?=null
     var ser_end_flag:Int?=null
     var cli_end_flag:Int?=null
+    var ser_res_common:Boolean?=null
     lateinit var ser_res_mes:ByteArray
     lateinit var cli_res_mes:ByteArray
     private var ser_serversoc: ServerSocket?=null
@@ -101,6 +102,16 @@ object Control {
         Log.d(TAG, "ServerSend: return")
     }
 
+    suspend fun ServerReceiveCommonList()= withContext(Dispatchers.IO){
+        Log.d(TAG, "ServerReceiveCommonList: Start")
+        try {
+            Log.d(TAG, "ServerReceiveCommonList: try")
+            ser_res_common=ser_Dis?.readBoolean()
+            Log.d(TAG, "ServerReceiveCommonList: receive value $ser_res_common")
+        }catch (_:Exception){}
+        Log.d(TAG, "ServerReceiveCommonList: return")
+    }
+
     suspend fun ClientSend2(cli_mes:List<ByteArray>)= withContext(Dispatchers.IO){
         Log.d(TAG, "ClientSend2: Start")
         try {
@@ -131,6 +142,31 @@ object Control {
                 ClientReceiveEnd()
             }
         }catch (_:Exception){}
+    }
+
+    suspend fun ClientSendCommonlist(array: BooleanArray)= withContext(Dispatchers.IO){
+        Log.d(TAG, "ClientSendCommonlist: Start")
+        try {
+            Log.d(TAG, "ClientSendCommonlist: try")
+            val listsize=array.size
+            cli_Dos?.writeInt(listsize)
+            cli_Dos?.flush()
+            ClientReceiveNotice()
+            if(cli_res_size==listsize){
+                Log.d(TAG, "ClientSendCommonlist: send array")
+                for (bool in array){
+                    cli_Dos?.writeBoolean(bool)
+                    cli_Dos?.flush()
+                    ClientReceiveNotice()
+                    if(cli_res_size!=1){
+                        Log.d(TAG, "ClientSendCommonlist: miss send")
+                        break
+                    }
+                }
+                ClientReceiveEnd()
+            }
+        }catch (_:Exception){}
+        Log.d(TAG, "ClientSendCommonlist: return")
     }
 
 
