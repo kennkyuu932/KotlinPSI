@@ -28,15 +28,6 @@ object Control {
     private var cli_socket: Socket?=null
     private var cli_Dis: DataInputStream?=null
     private var cli_Dos: DataOutputStream?=null
-//
-//    private val START1 : String = "start step1"
-//    private val FINISH1 : String = "finish step1"
-//    private val START2 : String = "start step2"
-//    private val FINISH2 : String = "finish step2"
-//    private val START3 : String = "start step3"
-//    private val FINISH3 : String = "finish step3"
-//    private val START4 : String = "start step4"
-//    private val FINISH4 : String = "finish step4"
 
     const val PORT: Int = 50000
 
@@ -68,13 +59,12 @@ object Control {
         Log.d(TAG, "ClientConnect: return")
     }
 
-    //
-    suspend fun ServerSend2(ser_mes:List<ByteArray>)= withContext(Dispatchers.IO){
+    suspend fun ServerSend(ser_mes:List<ByteArray>)= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerSend: Start")
         try {
-            Log.d(TAG, "ServerSend2: try")
+            Log.d(TAG, "ServerSend: try")
             val firstsize=ser_mes.size
-            Log.d(TAG, "ServerSend2: send first list size $firstsize")
+            Log.d(TAG, "ServerSend: send first list size $firstsize")
             ser_Dos?.writeInt(firstsize)
             ser_Dos?.flush()
             ServerReceiveNotice()
@@ -86,12 +76,12 @@ object Control {
                     ser_Dos?.flush()
                     ServerReceiveNotice()
                     if(ser_res_size==mes.size){
-                        Log.d(TAG, "ServerSend2: start send message")
+                        Log.d(TAG, "ServerSend: start send message")
                         ser_Dos?.write(mes,0,mes.size)
                         ser_Dos?.flush()
                         ServerReceiveNotice()
                         if(ser_res_size!=mes.size){
-                            Log.d(TAG, "ServerSend2: miss send")
+                            Log.d(TAG, "ServerSend: miss send")
                             break
                         }
                     }
@@ -112,12 +102,12 @@ object Control {
         Log.d(TAG, "ServerReceiveCommonList: return")
     }
 
-    suspend fun ClientSend2(cli_mes:List<ByteArray>)= withContext(Dispatchers.IO){
-        Log.d(TAG, "ClientSend2: Start")
+    suspend fun ClientSend(cli_mes:List<ByteArray>)= withContext(Dispatchers.IO){
+        Log.d(TAG, "ClientSend: Start")
         try {
-            Log.d(TAG, "ClientSend2: try")
+            Log.d(TAG, "ClientSend: try")
             val firstlistsize=cli_mes.size
-            Log.d(TAG, "ClientSend2: send first list size $firstlistsize")
+            Log.d(TAG, "ClientSend: send first list size $firstlistsize")
             cli_Dos?.writeInt(firstlistsize)
             cli_Dos?.flush()
             ClientReceiveNotice()
@@ -129,12 +119,12 @@ object Control {
                     cli_Dos?.flush()
                     ClientReceiveNotice()
                     if(cli_res_size==mes.size){
-                        Log.d(TAG, "ClientSend2: Start send message")
+                        Log.d(TAG, "ClientSend: Start send message")
                         cli_Dos?.write(mes,0,mes.size)
                         cli_Dos?.flush()
                         ClientReceiveNotice()
                         if(cli_res_size!=mes.size){
-                            Log.d(TAG, "ClientSend2: miss send")
+                            Log.d(TAG, "ClientSend: miss send")
                             break
                         }
                     }
@@ -170,71 +160,21 @@ object Control {
     }
 
 
-    //
-
-    //テスト1
-    suspend fun ServerSend(ser_mes:List<List<ByteArray>>)= withContext(Dispatchers.IO){
-        Log.d(TAG, "ServerSend: Start")
-        try {
-            Log.d(TAG, "ServerSend: try")
-            val first_size = ser_mes.size
-            //ser_Dos= DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
-            Log.d(TAG, "ServerSend: send first list size $first_size")
-            ser_Dos?.writeInt(first_size)
-            ser_Dos?.flush()
-            //Log.d(TAG, "ServerSend: ${ser_socket?.isOutputShutdown} : ${ser_socket?.isOutputShutdown}")
-            //クライアントからの応答を受け取る
-            ServerReceiveNotice()
-            if(ser_res_size==first_size){
-                //フラグの初期化
-                ser_res_size=null
-                for (mes in ser_mes){
-                    ser_Dos?.writeInt(mes.size)
-                    ser_Dos?.flush()
-                    ServerReceiveNotice()
-                    if(ser_res_size==mes.size){
-                        //フラグの初期化
-                        ser_res_size=null
-                        for (message in mes){
-                            ser_Dos?.writeInt(message.size)
-                            ser_Dos?.flush()
-                            ServerReceiveNotice()
-                            if(ser_res_size==message.size){
-                                Log.d(TAG, "ServerSend: 最小リストのサイズ ${message.size}")
-                                ser_Dos?.write(message,0,message.size)
-                                ser_Dos?.flush()
-                                Log.d(TAG, "ServerSend: sendmes ${message.toString()}")
-                                ServerReceiveNotice()
-                                if (ser_res_size!=message.size){
-                                    Log.d(TAG, "ServerSend: miss send")
-                                    break
-                                }
-                            }
-                        }
-                    }
-                }
-                ServerReceiveEnd()
-            }
-        }catch (_:Exception){}
-        Log.d(TAG, "ServerSend: return")
-    }
 
     suspend fun ServerReceiveNotice()= withContext(Dispatchers.IO){
-        Log.d(TAG, "ServerNotice: Start")
+        Log.d(TAG, "ServerReceiveNotice: Start")
         try {
-            Log.d(TAG, "ServerNotice: try")
-            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
+            Log.d(TAG, "ServerReceiveNotice: try")
             ser_res_size=ser_Dis?.readInt()
-            Log.d(TAG, "ServerNotice: $ser_res_size")
+            Log.d(TAG, "ServerReceiveNotice: $ser_res_size")
         }catch (_:Exception){}
-        Log.d(TAG, "ServerNotice: return")
+        Log.d(TAG, "ServerReceiveNotice: return")
     }
 
     suspend fun ServerReceiveEnd()= withContext(Dispatchers.IO){
         Log.d(TAG, "ServerReceiveEnd: Start")
         try {
             Log.d(TAG, "ServerReceiveEnd: try")
-            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_end_flag= ser_Dis?.readInt()
             Log.d(TAG, "ServerReceiveEnd: receive $ser_end_flag")
         }catch (_:Exception){}
@@ -245,7 +185,6 @@ object Control {
         Log.d(TAG, "ServerReceive: Start")
         try {
             Log.d(TAG, "ServerReceiveSize: try")
-            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_res_size= ser_Dis?.readInt()
             Log.d(TAG, "ServerReceiveSize: $ser_res_size")
         }catch (_:Exception){}
@@ -256,7 +195,6 @@ object Control {
         Log.d(TAG, "ServerSendNotice: Start")
         try {
             Log.d(TAG, "ServerSendNotice: try")
-            //ser_Dos=DataOutputStream(BufferedOutputStream(ser_socket?.getOutputStream()))
             ser_Dos?.writeInt(flag)
             ser_Dos?.flush()
         }catch (_:Exception){}
@@ -268,61 +206,16 @@ object Control {
         try {
             Log.d(TAG, "ServerReceive: try")
             ser_res_mes= ByteArray(res_size)
-            //ser_Dis= DataInputStream(BufferedInputStream(ser_socket?.getInputStream()))
             ser_Dis?.read(ser_res_mes,0,res_size)
             Log.d(TAG, "ServerReceive: message ${ser_res_mes.toString()}")
         }catch (_:Exception){}
         Log.d(TAG, "ServerReceive: return")
     }
 
-    suspend fun ClientSend(cli_mes:List<List<ByteArray>>)= withContext(Dispatchers.IO){
-        Log.d(TAG, "ClientSend: Start")
-        try {
-            Log.d(TAG, "ClientSend: try")
-            val first_size=cli_mes.size
-            //cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
-            Log.d(TAG, "ClientSend: send first list size $first_size")
-            cli_Dos?.writeInt(first_size)
-            cli_Dos?.flush()
-            //応答を受け取る
-            ClientReceiveNotice()
-            if (cli_res_size==first_size){
-                cli_res_size=null
-                for (mes in cli_mes){
-                    cli_Dos?.writeInt(mes.size)
-                    cli_Dos?.flush()
-                    ClientReceiveNotice()
-                    if(cli_res_size==mes.size){
-                        cli_res_size=null
-                        for (message in mes){
-                            cli_Dos?.writeInt(message.size)
-                            cli_Dos?.flush()
-                            ClientReceiveNotice()
-                            if(cli_res_size==message.size){
-                                Log.d(TAG, "ClientSend: 最小リストのサイズ ${message.size}")
-                                cli_Dos?.write(message,0,message.size)
-                                cli_Dos?.flush()
-                                Log.d(TAG, "ClientSend: send mes ${message.toString()}")
-                                ClientReceiveNotice()
-                                if( cli_res_size!=message.size){
-                                    Log.d(TAG, "ClientSend: miss send")
-                                    break
-                                }
-                            }
-                        }
-                    }
-                }
-                ClientReceiveEnd()
-            }
-        }catch (_:Exception){}
-        Log.d(TAG, "ClientSend: return")
-    }
-
     suspend fun ClientReceiveEnd()= withContext(Dispatchers.IO){
         Log.d(TAG, "ClientReceiveEnd: Start")
         try {
             Log.d(TAG, "ClientReceiveEnd: try")
-            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_end_flag= cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveEnd: $cli_end_flag")
         }catch (_:Exception){}
@@ -333,7 +226,6 @@ object Control {
         Log.d(TAG, "ClientReceiveNotice: Start")
         try {
             Log.d(TAG, "ClientReceiveNotice: try")
-            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_res_size= cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveNotice: $cli_res_size")
         }catch (_:Exception){}
@@ -344,8 +236,6 @@ object Control {
         Log.d(TAG, "ClientReceiveSize: Start")
         try {
             Log.d(TAG, "ClientReceiveSize: try")
-            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
-            //Log.d(TAG, "ClientReceiveSize: ${cli_Dis?.available()}")
             cli_res_size=cli_Dis?.readInt()
             Log.d(TAG, "ClientReceiveSize: $cli_res_size")
         }catch(_:Exception){}
@@ -355,51 +245,38 @@ object Control {
     suspend fun ClientSendNotice(flag:Int)= withContext(Dispatchers.IO){
         Log.d(TAG, "ClientSendFlag: Start")
         try {
-//            sleep(1000)
             Log.d(TAG, "ClientSendFlag: try")
-            //cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
             cli_Dos?.writeInt(flag)
             cli_Dos?.flush()
         }catch (_:Exception){}
         Log.d(TAG, "ClientSendFlag: return")
     }
 
-
-
     suspend fun ClientReceive(res_size:Int)= withContext(Dispatchers.IO){
         Log.d(TAG, "ClientReceive: Start")
         try {
             Log.d(TAG, "ClientReceive: try")
             cli_res_mes=ByteArray(res_size)
-            //cli_Dis= DataInputStream(BufferedInputStream(cli_socket?.getInputStream()))
             cli_Dis?.read(cli_res_mes,0,res_size)
-            //Log.d(TAG, "ClientReceive: message ${cli_res_mes.let { String(it) }}")
             Log.d(TAG, "ClientReceive: message ${cli_res_mes.toString()}")
         }catch (_:Exception){}
         Log.d(TAG, "ClientReceive: return")
     }
-//
-//    suspend fun ClientSendEnd()= withContext(Dispatchers.IO){
-//        Log.d(TAG, "ClientSendEnd: Start")
-//        try {
-//            Log.d(TAG, "ClientSendEnd: try")
-//            cli_Dos= DataOutputStream(BufferedOutputStream(cli_socket?.getOutputStream()))
-//        }catch (_:Exception){}
-//        Log.d(TAG, "ClientSendEnd: return")
-//    }
 
-
-    //
-
-    fun DisConnect(){
+    fun DisConnectServer(){
         Log.d(TAG, "ServerDisConnect: Start")
         ser_serversoc?.close()
         ser_socket?.close()
         ser_Dis?.close()
         ser_Dos?.close()
+        Log.d(TAG, "ServerDisConnect: return")
+    }
+
+    fun DisConnectClient(){
+        Log.d(TAG, "DisConnectClient: Start")
         cli_socket?.close()
         cli_Dis?.close()
         cli_Dos?.close()
-        Log.d(TAG, "ServerDisConnect: return")
+        Log.d(TAG, "DisConnectClient: return")
     }
 }
