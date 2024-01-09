@@ -130,6 +130,19 @@ class MainActivity : AppCompatActivity() {
         //時間計測のためのTAG
         val TAG_TIME = "TIME_to_PSI"
 
+        var encrypt_start_first = 0L
+        var encrypt_finish_first = 0L
+        var send_start_first = 0L
+        var send_finish_first = 0L
+        var receive_start_first = 0L
+        var receive_finish_first = 0L
+        var encrypt_start_second = 0L
+        var encrypt_finish_second = 0L
+        var send_start_second = 0L
+        var send_finish_second = 0L
+        var receive_start_second = 0L
+        var receive_finish_second = 0L
+
         public lateinit var test:String
     }
 }

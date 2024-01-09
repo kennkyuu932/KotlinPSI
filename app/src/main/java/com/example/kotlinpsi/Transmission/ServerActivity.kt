@@ -87,55 +87,65 @@ class ServerActivity : AppCompatActivity() {
                 1->{
                     Toast.makeText(this,"finish step1",Toast.LENGTH_SHORT).show()
                     //受け取り(step2)
-                    lifecycleScope.launch {
-                        var i=0
-                        Control.ServerReceiveSize()
-                        val firstlistsize=Control.ser_res_size
-                        Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                        //Log.d(TAG, "onCreate: Otside loop $firstlistsize")
-                        while (i<firstlistsize!!){
-                            //フラグ初期化
-                            Control.ser_res_size=null
+                    MainActivity.receive_start_first=kotlin.system.measureNanoTime {
+                        lifecycleScope.launch {
+                            var i=0
                             Control.ServerReceiveSize()
-                            val secondlistsize=Control.ser_res_size
+                            val firstlistsize=Control.ser_res_size
                             Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                            if(secondlistsize!=null){
-                                Control.ServerReceive(secondlistsize)
+                            //Log.d(TAG, "onCreate: Otside loop $firstlistsize")
+                            while (i<firstlistsize!!){
+                                //フラグ初期化
+                                Control.ser_res_size=null
+                                Control.ServerReceiveSize()
+                                val secondlistsize=Control.ser_res_size
+                                Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+                                if(secondlistsize!=null){
+                                    Control.ServerReceive(secondlistsize)
+                                }
+                                Control.ser_res_mes.let { ser_res_list_first.add(it) }
+                                val res_size=Control.ser_res_mes.size
+                                Control.ServerSendNotice(res_size)
+                                i++
                             }
-                            Control.ser_res_mes.let { ser_res_list_first.add(it) }
-                            val res_size=Control.ser_res_mes.size
-                            Control.ServerSendNotice(res_size)
-                            i++
+                            Control.ServerSendNotice(2)
+                            serverviewmodel.server_end_flag.value=2
                         }
-                        Control.ServerSendNotice(2)
-                        serverviewmodel.server_end_flag.value=2
                     }
                 }
                 2->{
                     //step3 クライアントからもらった集合を暗号化して送る．
                     Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
-                    PSIdubleencrypt(ser_res_list_first,pri_key_kt)
-                    PSISendSecond(enc_mes_double,serverviewmodel)
+                    MainActivity.encrypt_start_second=kotlin.system.measureNanoTime {
+                        PSIdubleencrypt(ser_res_list_first,pri_key_kt)
+                    }
+                    //PSIdubleencrypt(ser_res_list_first,pri_key_kt)
+                    MainActivity.send_start_second=kotlin.system.measureNanoTime {
+                        PSISendSecond(enc_mes_double,serverviewmodel)
+                    }
+                    //PSISendSecond(enc_mes_double,serverviewmodel)
                 }
                 3->{
                     //step4 クライアントから共通部分の場所をもらう
                     Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: start step4")
-                    lifecycleScope.launch {
-                        var i=0
-                        Control.ServerReceiveSize()
-                        val firstlistsize = Control.ser_res_size
-                        Control.ser_res_size?.let { Control.ServerSendNotice(it) }
-                        //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
-                        while (i<firstlistsize!!){
-                            Control.ser_res_size=null
-                            Control.ServerReceiveCommonList()
-                            Control.ser_res_common?.let { ser_res_common.add(it) }
-                            Control.ServerSendNotice(1)
-                            i++
+                    MainActivity.receive_start_second=kotlin.system.measureNanoTime {
+                        lifecycleScope.launch {
+                            var i=0
+                            Control.ServerReceiveSize()
+                            val firstlistsize = Control.ser_res_size
+                            Control.ser_res_size?.let { Control.ServerSendNotice(it) }
+                            //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                            while (i<firstlistsize!!){
+                                Control.ser_res_size=null
+                                Control.ServerReceiveCommonList()
+                                Control.ser_res_common?.let { ser_res_common.add(it) }
+                                Control.ServerSendNotice(1)
+                                i++
+                            }
+                            Control.ServerSendNotice(4)
+                            serverviewmodel.server_end_flag.value=4
                         }
-                        Control.ServerSendNotice(4)
-                        serverviewmodel.server_end_flag.value=4
                     }
                 }
                 4->{
@@ -158,6 +168,13 @@ class ServerActivity : AppCompatActivity() {
                         i++
                     }
                     adapter.submitList(commonList)
+                    //時間をログに表示する(ナノ秒)
+                    Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化されら接触履歴を暗号化するのにかかった時間(ナノ秒) : ${MainActivity.encrypt_start_second}")
+                    Log.d(MainActivity.TAG_TIME,"再暗号化した接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_second}")
+                    Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_second}")
                 }
             }
 
@@ -173,9 +190,15 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.allLists.observe(this) { contacts ->
                     contacts.let {
                         PSIList=contacts
-                        Log.d(MainActivity.TAG_TIME, "onCreate: Start encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
-                        PSIencryptArray(contacts,pri_key_kt)
-                        Log.d(MainActivity.TAG_TIME, "onCreate: finish encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
+                        //Log.d(MainActivity.TAG_TIME, "onCreate: Start encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
+                        MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                            PSIencryptArray(contacts,pri_key_kt)
+                        }
+                        //PSIencryptArray(contacts,pri_key_kt)
+                        //Log.d(MainActivity.TAG_TIME, "onCreate: finish encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
+                        MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                            PSISendfirst(enc_mes_list,serverviewmodel)
+                        }
                         PSISendfirst(enc_mes_list,serverviewmodel)
                     }
                 }
@@ -192,8 +215,14 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.SearchMonth(start,now).asLiveData().observe(owner = this){
                     contacts -> contacts.let {
                         PSIList=contacts
-                        PSIencryptArray(contacts,pri_key_kt)
-                        PSISendfirst(enc_mes_list,serverviewmodel)
+                        MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                            PSIencryptArray(contacts,pri_key_kt)
+                        }
+                        MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                            PSISendfirst(enc_mes_list,serverviewmodel)
+                        }
+                        //PSIencryptArray(contacts,pri_key_kt)
+                        //PSISendfirst(enc_mes_list,serverviewmodel)
                     }
                 }
             }
@@ -213,8 +242,14 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                         contacts -> contacts.let {
                             PSIList=contacts
-                            PSIencryptArray(contacts,pri_key_kt)
-                            PSISendfirst(enc_mes_list,serverviewmodel)
+                            MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                                PSIencryptArray(contacts,pri_key_kt)
+                            }
+                            MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                                PSISendfirst(enc_mes_list,serverviewmodel)
+                            }
+                            //PSIencryptArray(contacts,pri_key_kt)
+                            //PSISendfirst(enc_mes_list,serverviewmodel)
                         }
                 }
             }
