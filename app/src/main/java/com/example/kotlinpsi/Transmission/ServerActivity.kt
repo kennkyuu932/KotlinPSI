@@ -167,7 +167,12 @@ class ServerActivity : AppCompatActivity() {
                         }
                         i++
                     }
-                    adapter.submitList(commonList)
+                    if(commonList.isEmpty()){
+                        val empty = findViewById<TextView>(R.id.common_text)
+                        empty.setText("共通集合はありません")
+                    }else{
+                        adapter.submitList(commonList)
+                    }
                     //時間をログに表示する(ナノ秒)
                     Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
                     Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
@@ -190,6 +195,7 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.allLists.observe(this) { contacts ->
                     contacts.let {
                         PSIList=contacts
+                        //Log.d(TAG, "onCreate: $contacts")
                         //Log.d(MainActivity.TAG_TIME, "onCreate: Start encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                             PSIencryptArray(contacts,pri_key_kt)
@@ -199,7 +205,7 @@ class ServerActivity : AppCompatActivity() {
                         MainActivity.send_start_first=kotlin.system.measureNanoTime {
                             PSISendfirst(enc_mes_list,serverviewmodel)
                         }
-                        PSISendfirst(enc_mes_list,serverviewmodel)
+                        //PSISendfirst(enc_mes_list,serverviewmodel)
                     }
                 }
             }
@@ -214,6 +220,7 @@ class ServerActivity : AppCompatActivity() {
                 }
                 contactViewModel.SearchMonth(start,now).asLiveData().observe(owner = this){
                     contacts -> contacts.let {
+                    //Log.d(TAG, "onCreate: $contacts")
                         PSIList=contacts
                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                             PSIencryptArray(contacts,pri_key_kt)
@@ -242,6 +249,7 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                         contacts -> contacts.let {
                             PSIList=contacts
+                    //Log.d(TAG, "onCreate: $contacts")
                             MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                 PSIencryptArray(contacts,pri_key_kt)
                             }

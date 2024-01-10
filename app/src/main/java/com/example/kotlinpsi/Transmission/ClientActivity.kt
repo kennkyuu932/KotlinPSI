@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
@@ -84,6 +85,7 @@ class ClientActivity : AppCompatActivity() {
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
@@ -107,6 +109,7 @@ class ClientActivity : AppCompatActivity() {
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
@@ -134,6 +137,7 @@ class ClientActivity : AppCompatActivity() {
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
@@ -214,7 +218,12 @@ class ClientActivity : AppCompatActivity() {
                         }
                         i++
                     }
-                    adapter.submitList(commonList)
+                    if(commonList.isEmpty()){
+                        val empty = findViewById<TextView>(R.id.common_clitent)
+                        empty.setText("共通集合はありません")
+                    }else{
+                        adapter.submitList(commonList)
+                    }
 
                     //時間の出力
                     Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")

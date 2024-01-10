@@ -66,6 +66,7 @@ object Control {
             val firstsize=ser_mes.size
             //Log.d(TAG, "ServerSend: send first list size $firstsize")
             ser_Dos?.writeInt(firstsize)
+            Log.d(TAG, "ServerSend: $firstsize")
             ser_Dos?.flush()
             ServerReceiveNotice()
             if (ser_res_size==firstsize){
@@ -166,6 +167,7 @@ object Control {
         try {
             //Log.d(TAG, "ServerReceiveNotice: try")
             ser_res_size=ser_Dis?.readInt()
+            Log.d(TAG, "ServerReceiveNotice: $ser_res_size")
             //Log.d(TAG, "ServerReceiveNotice: $ser_res_size")
         }catch (_:Exception){}
         //Log.d(TAG, "ServerReceiveNotice: return")
