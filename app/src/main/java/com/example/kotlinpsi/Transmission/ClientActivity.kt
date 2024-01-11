@@ -77,7 +77,7 @@ class ClientActivity : AppCompatActivity() {
             when(flag){
                 1 ->{
                     //Log.d(TAG, "onCreate: step2 Start")
-                    Toast.makeText(this,"start step2",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"start step2",Toast.LENGTH_SHORT).show()
                     //
                     when(radioflag){
                         0 ->{
@@ -154,7 +154,7 @@ class ClientActivity : AppCompatActivity() {
                 2->{
                     //step3 サーバが暗号化したクライアントの集合を受け取る
                     //Log.d(TAG, "onCreate: start step3")
-                    Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
                     MainActivity.receive_start_second=kotlin.system.measureNanoTime {
                         lifecycleScope.launch {
@@ -187,7 +187,7 @@ class ClientActivity : AppCompatActivity() {
                 }
                 3->{
                     //Log.d(TAG, "onCreate: start step4")
-                    Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: double encrypt size ${double_enc_mes.size}")
                     //復号と共通部分送信
                     MainActivity.encrypt_start_second=kotlin.system.measureNanoTime {
@@ -203,7 +203,7 @@ class ClientActivity : AppCompatActivity() {
                     //Log.d(TAG, "onCreate: finish")
                     //接続解除
                     Control.DisConnectClient()
-                    Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
                     //接触していた時間を画面に出力
                     var i=0
                     for(bool in commonlist_for_client){

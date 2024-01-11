@@ -85,7 +85,7 @@ class ServerActivity : AppCompatActivity() {
         val mserendflagObserver = Observer<Int>{ flag ->
             when(flag){
                 1->{
-                    Toast.makeText(this,"finish step1",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"finish step1",Toast.LENGTH_SHORT).show()
                     //受け取り(step2)
                     MainActivity.receive_start_first=kotlin.system.measureNanoTime {
                         lifecycleScope.launch {
@@ -115,7 +115,7 @@ class ServerActivity : AppCompatActivity() {
                 }
                 2->{
                     //step3 クライアントからもらった集合を暗号化して送る．
-                    Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     MainActivity.encrypt_start_second=kotlin.system.measureNanoTime {
                         PSIdubleencrypt(ser_res_list_first,pri_key_kt)
                     }
@@ -127,7 +127,7 @@ class ServerActivity : AppCompatActivity() {
                 }
                 3->{
                     //step4 クライアントから共通部分の場所をもらう
-                    Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"start step4",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: start step4")
                     MainActivity.receive_start_second=kotlin.system.measureNanoTime {
                         lifecycleScope.launch {
@@ -150,7 +150,7 @@ class ServerActivity : AppCompatActivity() {
                 }
                 4->{
                     //Log.d(TAG, "onCreate: finish")
-                    Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
                     //接続解除
                     Control.DisConnectServer()
                     //接触時間の表示
@@ -278,7 +278,7 @@ class ServerActivity : AppCompatActivity() {
 
     fun PSISendfirst(encmes:List<ByteArray>,viewmodel: ServerViewModel){
         //Log.d(TAG, "PSISend_first: send my encrypt data to client")
-        Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this,"通信開始(Server to Client)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             //Log.d(TAG, "PSISend_first: Start connect to client")
             Control.ServerConnect()
