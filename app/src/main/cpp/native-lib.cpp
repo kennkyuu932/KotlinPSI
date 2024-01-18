@@ -3,6 +3,7 @@
 #include <android/log.h>
 #include "include/openssl/ssl.h"
 #include "include/openssl/aes.h"
+#include <chrono>
 
 //EC_KEY *ec_key_psi;
 
@@ -315,6 +316,8 @@ Java_com_example_kotlinpsi_Transmission_ClientActivity_decryptcalc(JNIEnv *env, 
                                                                    jbyteArray double_mes,
                                                                    jbyteArray ser_mes,
                                                                    jbyteArray key) {
+    //時間計測
+//    static auto startdec=std::chrono::high_resolution_clock ::now();
     //データ変換
     int key_len=(int) env->GetArrayLength(key);
     uint8_t pri_key_byte[key_len];
@@ -350,10 +353,18 @@ Java_com_example_kotlinpsi_Transmission_ClientActivity_decryptcalc(JNIEnv *env, 
     r= BN_mod_inverse_blinded(&key_inverse,&out_no_inverse,pri_key,bnMontCtx,ctx);
     decrypt_mes= EC_POINT_new(ec_group);
     r= EC_POINT_mul(ec_group,decrypt_mes,&zero,double_enc_mes,&key_inverse,ctx);
+
+//    static auto enddec = std::chrono::high_resolution_clock ::now();
+
     //共通要素の計算
     // decrypt_mesとserver_enc_mesの比較
     // 一緒ならばtrueそうでなければfalse
     r=EC_POINT_cmp(ec_group,decrypt_mes,server_enc_mes,ctx);
+//    static auto endcmp =std::chrono::high_resolution_clock ::now();
+//    __android_log_print(ANDROID_LOG_DEBUG,"time_cpp","復号にかかる時間(ミリ秒): %f",
+//                        std::chrono::duration_cast<std::chrono::duration<double,std::ratio<1,1>>>(enddec-startdec).count());
+//    __android_log_print(ANDROID_LOG_DEBUG,"time_cpp","比較にかかる時間(ミリ秒): %f",
+//                        std::chrono::duration_cast<std::chrono::duration<double,std::ratio<1,1>>>(endcmp-enddec).count());
     if(r!=0){
        //__android_log_print(ANDROID_LOG_DEBUG,"cpp","compare false");
         return false;

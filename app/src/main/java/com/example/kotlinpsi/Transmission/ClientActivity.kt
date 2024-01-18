@@ -46,6 +46,7 @@ class ClientActivity : AppCompatActivity() {
     private val flagmodel:ClientViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_client)
 
@@ -81,10 +82,13 @@ class ClientActivity : AppCompatActivity() {
                     //
                     when(radioflag){
                         0 ->{
+                            MainActivity.client_data_read_start=System.currentTimeMillis()
                             contactViewModel.allLists.observe(this){
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                        MainActivity.client_data_read_finish=System.currentTimeMillis()
+                                        MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
@@ -109,6 +113,7 @@ class ClientActivity : AppCompatActivity() {
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                        MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
@@ -137,6 +142,7 @@ class ClientActivity : AppCompatActivity() {
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
                                         PSIList=contacts
+                                        MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                             PSIencryptArray(contacts,pri_key_kt)
@@ -204,6 +210,19 @@ class ClientActivity : AppCompatActivity() {
                     //接続解除
                     Control.DisConnectClient()
                     //Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
+                    MainActivity.client_PSI_second_finish=System.currentTimeMillis()
+
+                    //時間の出力
+                    Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
+                    Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化された接触履歴を復号，共通集合計算するのにかかった時間(ナノ秒) : ${MainActivity.encrypt_start_second}")
+                    Log.d(MainActivity.TAG_TIME,"共通要素を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_second}")
+                    //Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間 : ${MainActivity.receive_start_second}")
+                    Log.d(MainActivity.TAG_TIME, "PSIにかかる時間 : ${MainActivity.client_PSI_second_finish-MainActivity.client_PSI_second_start}")
+                    Log.d(MainActivity.TAG_TIME, "データ読み込み時間(ミリ秒) : ${MainActivity.client_data_read_finish-MainActivity.client_data_read_start}")
+
+
                     //接触していた時間を画面に出力
                     var i=0
                     for(bool in commonlist_for_client){
@@ -225,13 +244,9 @@ class ClientActivity : AppCompatActivity() {
                         adapter.submitList(commonList)
                     }
 
-                    //時間の出力
-                    Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
-                    Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
-                    Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
-                    Log.d(MainActivity.TAG_TIME,"暗号化された接触履歴を復号，共通集合計算するのにかかった時間(ナノ秒) : ${MainActivity.encrypt_start_second}")
-                    Log.d(MainActivity.TAG_TIME,"共通要素を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_second}")
-                    //Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間 : ${MainActivity.receive_start_second}")
+                    Log.d(TAG, "onCreate: データ数: ${PSIList.size}")
+                    Log.d(TAG, "onCreate: 共通集合数: ${commonList.size}")
+
                 }
             }
         }

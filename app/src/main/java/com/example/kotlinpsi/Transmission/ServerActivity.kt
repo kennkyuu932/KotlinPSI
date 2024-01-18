@@ -44,6 +44,7 @@ class ServerActivity : AppCompatActivity() {
     private val serverviewmodel:ServerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_server)
 
@@ -153,6 +154,21 @@ class ServerActivity : AppCompatActivity() {
                     //Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
                     //接続解除
                     Control.DisConnectServer()
+
+                    MainActivity.server_PSI_second_finish=System.currentTimeMillis()
+
+                    //時間をログに表示する(ナノ秒)
+                    Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
+                    Log.d(MainActivity.TAG_TIME,"暗号化されら接触履歴を暗号化するのにかかった時間(ナノ秒) : ${MainActivity.encrypt_start_second}")
+                    Log.d(MainActivity.TAG_TIME,"再暗号化した接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_second}")
+                    Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_second}")
+
+                    Log.d(MainActivity.TAG_TIME, "PSIにかかる時間(ミリ秒) : ${MainActivity.server_PSI_second_finish-MainActivity.server_PSI_second_start}")
+                    Log.d(MainActivity.TAG_TIME, "データ読み込み時間(ミリ秒) : ${MainActivity.server_data_read_finish-MainActivity.server_data_read_start}")
+
+
                     //接触時間の表示
                     var i=0
                     for(bool in ser_res_common){
@@ -173,13 +189,9 @@ class ServerActivity : AppCompatActivity() {
                     }else{
                         adapter.submitList(commonList)
                     }
-                    //時間をログに表示する(ナノ秒)
-                    Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
-                    Log.d(MainActivity.TAG_TIME,"暗号化した自分の接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_first}")
-                    Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
-                    Log.d(MainActivity.TAG_TIME,"暗号化されら接触履歴を暗号化するのにかかった時間(ナノ秒) : ${MainActivity.encrypt_start_second}")
-                    Log.d(MainActivity.TAG_TIME,"再暗号化した接触履歴を送るのにかかった時間(ナノ秒) : ${MainActivity.send_start_second}")
-                    Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_second}")
+                    Log.d(TAG, "onCreate: データ数: ${PSIList.size}")
+                    Log.d(TAG, "onCreate: 共通集合数: ${commonList.size}")
+
                 }
             }
 
@@ -192,9 +204,12 @@ class ServerActivity : AppCompatActivity() {
         when (radioflag) {
             0 -> {
                 //Log.d(TAG, "onCreate: 全部のデータでPSI")
+                MainActivity.server_data_read_start=System.currentTimeMillis()
                 contactViewModel.allLists.observe(this) { contacts ->
                     contacts.let {
                         PSIList=contacts
+                        MainActivity.server_data_read_finish=System.currentTimeMillis()
+                        MainActivity.server_PSI_second_start=System.currentTimeMillis()
                         //Log.d(TAG, "onCreate: $contacts")
                         //Log.d(MainActivity.TAG_TIME, "onCreate: Start encrypt time ${LocalDateTime.now().minute}:${LocalDateTime.now().second}:${LocalDateTime.now().nano}")
                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
@@ -222,6 +237,7 @@ class ServerActivity : AppCompatActivity() {
                     contacts -> contacts.let {
                     //Log.d(TAG, "onCreate: $contacts")
                         PSIList=contacts
+                        MainActivity.server_PSI_second_start=System.currentTimeMillis()
                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                             PSIencryptArray(contacts,pri_key_kt)
                         }
@@ -249,6 +265,7 @@ class ServerActivity : AppCompatActivity() {
                 contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                         contacts -> contacts.let {
                             PSIList=contacts
+                            MainActivity.server_PSI_second_start=System.currentTimeMillis()
                     //Log.d(TAG, "onCreate: $contacts")
                             MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
                                 PSIencryptArray(contacts,pri_key_kt)

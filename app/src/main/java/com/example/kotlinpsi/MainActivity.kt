@@ -142,6 +142,14 @@ class MainActivity : AppCompatActivity() {
         var send_finish_second = 0L
         var receive_start_second = 0L
         var receive_finish_second = 0L
+        var server_PSI_second_start = 0L
+        var server_PSI_second_finish = 0L
+        var client_PSI_second_start = 0L
+        var client_PSI_second_finish = 0L
+        var server_data_read_start=0L
+        var server_data_read_finish=0L
+        var client_data_read_start=0L
+        var client_data_read_finish=0L
 
         public lateinit var test:String
     }
