@@ -33,10 +33,10 @@
         android:id="@+id/to_adddata"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="132dp"
+        android:layout_marginTop="24dp"
         android:text="@string/add_data"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintHorizontal_bias="0.073"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -103,9 +103,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/to_adddata" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/scanrecycler"
+        android:layout_width="400dp"
+        android:layout_height="261dp"
         app:layout_constraintBottom_toTopOf="@+id/radioGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/to_adddata" />
+        app:layout_constraintTop_toBottomOf="@+id/kamei" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
