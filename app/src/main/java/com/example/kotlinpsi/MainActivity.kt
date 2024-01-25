@@ -53,17 +53,21 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val psibutton=binding.psiStart
-        psibutton.setOnClickListener {
-            val server_mes=binding.serverMessage.text.toString()
-            val client_mes=binding.clientMessage.text.toString()
-            val result=OneCryptoMessage(server_mes,client_mes)
-            val intent: Intent = Intent(this,PSIAfterActivity::class.java)
-            intent.putExtra(server_intent_message,server_mes)
-            intent.putExtra(client_intent_message,client_mes)
-            intent.putExtra(psi_intent_message,result)
-            startActivity(intent)
-        }
+        val kamei=findViewById<TextView>(R.id.kamei)
+        val range = (0..10000)
+        kamei.setText("あなたの仮名は"+range.random()+"です")
+
+//        val psibutton=binding.psiStart
+//        psibutton.setOnClickListener {
+//            val server_mes=binding.serverMessage.text.toString()
+//            val client_mes=binding.clientMessage.text.toString()
+//            val result=OneCryptoMessage(server_mes,client_mes)
+//            val intent: Intent = Intent(this,PSIAfterActivity::class.java)
+//            intent.putExtra(server_intent_message,server_mes)
+//            intent.putExtra(client_intent_message,client_mes)
+//            intent.putExtra(psi_intent_message,result)
+//            startActivity(intent)
+//        }
 
         val ip_text=findViewById<EditText>(R.id.edit_ip)
 
@@ -150,6 +154,19 @@ class MainActivity : AppCompatActivity() {
         var server_data_read_finish=0L
         var client_data_read_start=0L
         var client_data_read_finish=0L
+
+        var server_send_first2=0L
+        var server_receive_first2=0L
+        var server_send_second2=0L
+        var server_receive_second2=1L
+        var test_start_server=0L
+        var test_finish_server=0L
+        var client_send_first2=0L
+        var client_receive_first2=0L
+        var client_send_second2=1L
+        var client_receive_second2=0L
+        var test_start_client=0L
+        var test_finish_client=0L
 
         public lateinit var test:String
     }

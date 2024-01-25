@@ -27,8 +27,6 @@ class ClientActivity : AppCompatActivity() {
 
     val ec_point_length=65
 
-
-
     val enc_mes_list = mutableListOf<ByteArray>()
 
     //サーバーに送る共通部分
@@ -52,6 +50,8 @@ class ClientActivity : AppCompatActivity() {
 
         val ipaddr=intent.getStringExtra(MainActivity.server_ip)
         val radioflag=intent.getIntExtra(MainActivity.radioflag,0)
+
+        val loadtext=findViewById<TextView>(R.id.katei_client)
 
         val adapter = CommonListAdapter()
         val recycler = findViewById<RecyclerView>(R.id.recycler_client)
@@ -83,6 +83,7 @@ class ClientActivity : AppCompatActivity() {
                     when(radioflag){
                         0 ->{
                             MainActivity.client_data_read_start=System.currentTimeMillis()
+                            loadtext.text = "データベース読み込み中"
                             contactViewModel.allLists.observe(this){
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
@@ -91,9 +92,11 @@ class ClientActivity : AppCompatActivity() {
                                         MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "自分の接触履歴の暗号化中"
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
                                         MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "暗号化した接触履歴の送信中"
                                             PSISendClient(enc_mes_list,flagmodel)
                                         }
                                         //PSIencryptArray(contacts,pri_key_kt)
@@ -109,6 +112,7 @@ class ClientActivity : AppCompatActivity() {
                             }else{
                                 start= LocalDateTime.of(now.year,now.monthValue-1,now.dayOfMonth,now.hour,now.minute)
                             }
+                            loadtext.text = "データベース読み込み中"
                             contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
@@ -116,9 +120,11 @@ class ClientActivity : AppCompatActivity() {
                                         MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "自分の接触履歴の暗号化中"
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
                                         MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "暗号化した接触履歴の送信中"
                                             PSISendClient(enc_mes_list,flagmodel)
                                         }
                                         //PSIencryptArray(contacts,pri_key_kt)
@@ -138,6 +144,7 @@ class ClientActivity : AppCompatActivity() {
                             }else{
                                 start=LocalDateTime.of(now.year,now.monthValue-3,now.dayOfMonth,now.hour,now.minute)
                             }
+                            loadtext.text = "データベース読み込み中"
                             contactViewModel.SearchMonth(start,now).asLiveData().observe(this){
                                     contacts -> contacts.let {
                                         //Log.d(TAG, "onCreate: PSI step2")
@@ -145,9 +152,11 @@ class ClientActivity : AppCompatActivity() {
                                         MainActivity.client_PSI_second_start=System.currentTimeMillis()
                                 //Log.d(TAG, "onCreate: $contacts")
                                         MainActivity.encrypt_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "自分の接触履歴の暗号化中"
                                             PSIencryptArray(contacts,pri_key_kt)
                                         }
                                         MainActivity.send_start_first=kotlin.system.measureNanoTime {
+                                            loadtext.text = "暗号化した接触履歴の送信中"
                                             PSISendClient(enc_mes_list,flagmodel)
                                         }
                                         //PSIencryptArray(contacts,pri_key_kt)
@@ -162,31 +171,34 @@ class ClientActivity : AppCompatActivity() {
                     //Log.d(TAG, "onCreate: start step3")
                     //Toast.makeText(this,"start step3",Toast.LENGTH_SHORT).show()
                     //Log.d(TAG, "onCreate: receive list size ${cli_res_encrypt_first.size}")
+                    loadtext.text = "二重に暗号化された自分の接触履歴の受け取り中"
                     MainActivity.receive_start_second=kotlin.system.measureNanoTime {
                         lifecycleScope.launch {
-                            //Log.d(TAG, "onCreate: step3 start back thread")
-                            //
-                            var i=0
-                            Control.ClientReceiveSize()
-                            val firstlistsize=Control.cli_res_size
-                            Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                            //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
-                            while (i<firstlistsize!!){
-                                //フラグ初期化
-                                Control.cli_res_size=null
+                            MainActivity.client_receive_second2=kotlin.system.measureNanoTime {
+                                //Log.d(TAG, "onCreate: step3 start back thread")
+                                //
+                                var i=0
                                 Control.ClientReceiveSize()
-                                val secondlistsize=Control.cli_res_size
+                                val firstlistsize=Control.cli_res_size
                                 Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                                if(secondlistsize!=null){
-                                    Control.ClientReceive(secondlistsize)
+                                //Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                                while (i<firstlistsize!!){
+                                    //フラグ初期化
+                                    Control.cli_res_size=null
+                                    Control.ClientReceiveSize()
+                                    val secondlistsize=Control.cli_res_size
+                                    Control.cli_res_size?.let { Control.ClientSendNotice(it) }
+                                    if(secondlistsize!=null){
+                                        Control.ClientReceive(secondlistsize)
+                                    }
+                                    Control.cli_res_mes.let { double_enc_mes.add(it) }
+                                    val res_size = Control.cli_res_mes.size
+                                    Control.ClientSendNotice(res_size)
+                                    i++
                                 }
-                                Control.cli_res_mes.let { double_enc_mes.add(it) }
-                                val res_size = Control.cli_res_mes.size
-                                Control.ClientSendNotice(res_size)
-                                i++
+                                Control.ClientSendNotice(3)
+                                flagmodel.receiveflag.value=3
                             }
-                            Control.ClientSendNotice(3)
-                            flagmodel.receiveflag.value=3
                         }
                     }
 
@@ -197,9 +209,11 @@ class ClientActivity : AppCompatActivity() {
                     //Log.d(TAG, "onCreate: double encrypt size ${double_enc_mes.size}")
                     //復号と共通部分送信
                     MainActivity.encrypt_start_second=kotlin.system.measureNanoTime {
+                        loadtext.text = "接触履歴の復号と共通要素を取得中"
                         PSIdecryptcalc(double_enc_mes,cli_res_encrypt_first,pri_key_kt)
                     }
                     MainActivity.send_start_second=kotlin.system.measureNanoTime {
+                        loadtext.text = "共通要素を送信中"
                         PSISendCommonlist(commonlist_to_server,flagmodel)
                     }
                     //PSIdecryptcalc(double_enc_mes,cli_res_encrypt_first,pri_key_kt)
@@ -212,6 +226,8 @@ class ClientActivity : AppCompatActivity() {
                     //Toast.makeText(this,"finish",Toast.LENGTH_SHORT).show()
                     MainActivity.client_PSI_second_finish=System.currentTimeMillis()
 
+                    loadtext.text = "共通要素を表示中"
+
                     //時間の出力
                     Log.d(MainActivity.TAG_TIME,"暗号化された相手の接触履歴を受け取るのにかかった時間(ナノ秒) : ${MainActivity.receive_start_first}")
                     Log.d(MainActivity.TAG_TIME, "接触履歴の暗号化にかかった時間(ナノ秒) : ${MainActivity.encrypt_start_first}")
@@ -221,6 +237,13 @@ class ClientActivity : AppCompatActivity() {
                     //Log.d(MainActivity.TAG_TIME,"共通集合を受け取るのにかかった時間 : ${MainActivity.receive_start_second}")
                     Log.d(MainActivity.TAG_TIME, "PSIにかかる時間 : ${MainActivity.client_PSI_second_finish-MainActivity.client_PSI_second_start}")
                     Log.d(MainActivity.TAG_TIME, "データ読み込み時間(ミリ秒) : ${MainActivity.client_data_read_finish-MainActivity.client_data_read_start}")
+
+                    Log.d(MainActivity.TAG_TIME, "送信時間first(新規) : ${MainActivity.client_send_first2}")
+                    Log.d(MainActivity.TAG_TIME, "受信時間first(新規) : ${MainActivity.client_receive_first2}")
+                    Log.d(MainActivity.TAG_TIME, "送信時間second(新規) : ${MainActivity.client_send_second2}")
+                    Log.d(MainActivity.TAG_TIME, "受信時間second(新規) : ${MainActivity.client_receive_second2}")
+
+                    Log.d(MainActivity.TAG_TIME, "送信時間second(新規2) : ${MainActivity.test_finish_client-MainActivity.test_start_client}")
 
 
                     //接触していた時間を画面に出力
@@ -239,13 +262,15 @@ class ClientActivity : AppCompatActivity() {
                     }
                     if(commonList.isEmpty()){
                         val empty = findViewById<TextView>(R.id.common_clitent)
-                        empty.setText("共通集合はありません")
+                        empty.text = "共通集合はありません"
                     }else{
                         adapter.submitList(commonList)
                     }
 
+                    loadtext.text = "PSIが完了しました"
+
                     Log.d(TAG, "onCreate: データ数: ${PSIList.size}")
-                    Log.d(TAG, "onCreate: 共通集合数: ${commonList.size}")
+                    //Log.d(TAG, "onCreate: 共通集合数: ${commonList.size}")
 
                 }
             }
@@ -255,31 +280,34 @@ class ClientActivity : AppCompatActivity() {
 
 
         MainActivity.receive_start_first=kotlin.system.measureNanoTime {
+            loadtext.text = "通信相手から暗号化された接触履歴を受け取り中"
             lifecycleScope.launch {
-                //step1受け取り
-                if(ipaddr!=null){
-                    Control.ClientConnect(ipaddr)
-                    var i=0
-                    Control.ClientReceiveSize()
-                    val firstlistsize=Control.cli_res_size
-                    Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                    Log.d(TAG, "onCreate: Outside loop $firstlistsize")
-                    while (i<firstlistsize!!){
-                        //フラグ初期化
-                        Control.cli_res_size=null
+                MainActivity.client_receive_first2=kotlin.system.measureNanoTime {
+                    //step1受け取り
+                    if(ipaddr!=null){
+                        Control.ClientConnect(ipaddr)
+                        var i=0
                         Control.ClientReceiveSize()
-                        val secondlistsize=Control.cli_res_size
+                        val firstlistsize=Control.cli_res_size
                         Control.cli_res_size?.let { Control.ClientSendNotice(it) }
-                        if(secondlistsize!=null){
-                            Control.ClientReceive(secondlistsize)
+                        Log.d(TAG, "onCreate: Outside loop $firstlistsize")
+                        while (i<firstlistsize!!){
+                            //フラグ初期化
+                            Control.cli_res_size=null
+                            Control.ClientReceiveSize()
+                            val secondlistsize=Control.cli_res_size
+                            Control.cli_res_size?.let { Control.ClientSendNotice(it) }
+                            if(secondlistsize!=null){
+                                Control.ClientReceive(secondlistsize)
+                            }
+                            Control.cli_res_mes.let { cli_res_encrypt_first.add(it) }
+                            val res_size = Control.cli_res_mes.size
+                            Control.ClientSendNotice(res_size)
+                            i++
                         }
-                        Control.cli_res_mes.let { cli_res_encrypt_first.add(it) }
-                        val res_size = Control.cli_res_mes.size
-                        Control.ClientSendNotice(res_size)
-                        i++
+                        Control.ClientSendNotice(1)
+                        flagmodel.receiveflag.value=1
                     }
-                    Control.ClientSendNotice(1)
-                    flagmodel.receiveflag.value=1
                 }
             }
         }
@@ -299,9 +327,12 @@ class ClientActivity : AppCompatActivity() {
         //Log.d(TAG, "PSISendClient: send data to server")
         //Toast.makeText(this,"通信開始(Client to Server)",Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            Control.ClientSend(encmes)
-            viewmodel.receiveflag.value=Control.cli_end_flag
-            //Log.d(TAG, "PSISendClient: return")
+            MainActivity.client_send_first2=kotlin.system.measureNanoTime {
+                Control.ClientSend(encmes)
+                viewmodel.receiveflag.value=Control.cli_end_flag
+                //Log.d(TAG, "PSISendClient: return")
+            }
+
         }
     }
 
@@ -315,7 +346,7 @@ class ClientActivity : AppCompatActivity() {
             var client_count = 0
             for (double_mes in doubleencmes){
                 e=decryptcalc(double_mes,ser_mes,pri_key_kt)
-                if(server_count==0){
+                if(client_count==0){
                     commonlist_for_client[client_count]=e
                 }else{
                     if(commonlist_for_client[client_count]==false){
@@ -325,7 +356,7 @@ class ClientActivity : AppCompatActivity() {
                 if(e){
                     commonlist_to_server[server_count]=e
                 }else{
-                    if (client_count==0){
+                    if (server_count==0){
                         commonlist_to_server[server_count]=e
                     }
                 }
@@ -337,8 +368,13 @@ class ClientActivity : AppCompatActivity() {
 
     fun PSISendCommonlist(array: BooleanArray,viewmodel: ClientViewModel){
         lifecycleScope.launch {
-            Control.ClientSendCommonlist(array)
-            viewmodel.receiveflag.value=Control.cli_end_flag
+            MainActivity.test_start_client=System.currentTimeMillis()
+            MainActivity.client_send_second2=kotlin.system.measureNanoTime {
+                Control.ClientSendCommonlist(array)
+                viewmodel.receiveflag.value=Control.cli_end_flag
+                MainActivity.test_finish_client=System.currentTimeMillis()
+            }
+
         }
     }
 
